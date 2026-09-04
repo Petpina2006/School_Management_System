@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -13,12 +12,18 @@ class AttendanceSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('attendances')->insert([
-            ['user_id' => 1, 'date' => '2026-09-01', 'status' => 'Present', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 2, 'date' => '2026-09-01', 'status' => 'Absent', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 3, 'date' => '2026-09-01', 'status' => 'Late', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'date' => '2026-09-02', 'status' => 'Present', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 2, 'date' => '2026-09-02', 'status' => 'Present', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        $rows = [
+            ['student_id' => 1, 'class_id' => 1, 'teacher_id' => 1, 'attendance_date' => '2026-09-01', 'status' => 'present', 'remark' => null],
+            ['student_id' => 2, 'class_id' => 1, 'teacher_id' => 1, 'attendance_date' => '2026-09-01', 'status' => 'absent', 'remark' => 'Sick'],
+            ['student_id' => 3, 'class_id' => 2, 'teacher_id' => 1, 'attendance_date' => '2026-09-01', 'status' => 'late', 'remark' => null],
+            ['student_id' => 1, 'class_id' => 1, 'teacher_id' => 1, 'attendance_date' => '2026-09-02', 'status' => 'present', 'remark' => null],
+            ['student_id' => 2, 'class_id' => 1, 'teacher_id' => 1, 'attendance_date' => '2026-09-02', 'status' => 'present', 'remark' => null],
+        ];
+
+        foreach ($rows as $row) {
+            $row['created_at'] = now();
+            $row['updated_at'] = now();
+            DB::table('attendance')->insert($row);
+        }
     }
 }
