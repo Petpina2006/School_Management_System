@@ -69,19 +69,19 @@ class StudentController extends Controller
             $student = Student::find($id);
             if (!$student) {
                 return response()->json([
-                    'message' => 'User not found',
+                    'message' => 'Student not found',
                     'status' => false,
                     'data' => null
                 ], 404);
             }
             return response()->json([
-                'message' => 'User found successfully',
+                'message' => 'Student found successfully',
                 'status' => true,
                 'data' => $student
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'User not found',
+                'message' => 'Student Show Fail',
                 'status' => false,
                 'error' => $e->getMessage(),
                 'data' => null
@@ -94,7 +94,7 @@ class StudentController extends Controller
             $student = Student::find($id);
             if (!$student) {
                 return response()->json([
-                    'message' => 'User not found',
+                    'message' => 'Student not found',
                     'status' => false,
                     'data' => null
                 ], 404);
@@ -121,14 +121,14 @@ class StudentController extends Controller
             $student = Student::find($id);
             if (!$student) {
                 return response()->json([
-                    'message' => 'User not found',
+                    'message' => 'Student not found',
                     'status' => false,
                     'data' => null
                 ], 404);
             }
             $validated = $request->validate([
                 'user_id' => ['required', 'integer', 'exists:users,id'],
-                'student_code' => ['required', 'string', 'max:50', 'unique:students,student_code'],
+                'student_code' => ['required', 'string', 'max:50', 'unique:students,student_code'. $id],
                 'Full_name' => ['required', 'string', 'max:255'],
                 'gender' => ['required', 'in:male,female'],
                 'date_of_birth' => ['required', 'date'],

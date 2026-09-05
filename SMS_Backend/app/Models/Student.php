@@ -20,4 +20,8 @@ class Student extends Model
         'parent_phone',
         'status'
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
