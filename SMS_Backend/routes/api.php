@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClassController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
@@ -28,3 +29,9 @@ Route::post('/teachers', [TeacherController::class, 'store']);
 Route::get('/teachers/{id}', [TeacherController::class, 'show']);
 Route::put('/teachers/{id}', [TeacherController::class, 'update']);
 Route::delete('/teachers/{id}', [TeacherController::class, 'destroy']);
+
+Route::get('/classes',[ClassController::class, 'index']);
+Route::post('/classes', [ClassController::class, 'store']);
+Route::get('/classes/{id}', [ClassController::class, 'show']);
+Route::put('/classes/{id}', [ClassController::class, 'update']);
+Route::delete('/classes/{id}', [ClassController::class, 'destroy']);    
