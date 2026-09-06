@@ -4,26 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Student extends Model
+class Teacher extends Model
 {
-    //
-    protected $table = 'students';
+    protected $table = 'teachers';
     protected $fillable = [
         'user_id',
-        'student_code',
-        'Full_name',
+        'teacher_code',
+        'first_name',
+        'last_name',
         'gender',
         'date_of_birth',
         'phone',
         'photo',
         'address',
-        'parent_name',
-        'parent_phone',
+        'hire_date',
+        'specialization',
         'status'
     ];
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
 }
