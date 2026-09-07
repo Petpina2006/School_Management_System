@@ -31,18 +31,15 @@ Route::get('/teachers/{id}', [TeacherController::class, 'show']);
 Route::put('/teachers/{id}', [TeacherController::class, 'update']);
 Route::delete('/teachers/{id}', [TeacherController::class, 'destroy']);
 
-<<<<<<< HEAD
 Route::get('/classes',[ClassController::class, 'index']);
 Route::post('/classes', [ClassController::class, 'store']);
 Route::get('/classes/{id}', [ClassController::class, 'show']);
 Route::put('/classes/{id}', [ClassController::class, 'update']);
 Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
    
-=======
 // subject
 Route::get('/subjects',[SubjectController::class, 'index']);
 Route::post('/subjects', [SubjectController::class, 'store']);
 Route::get('/subjects/{id}', [SubjectController::class, 'show']);
 Route::put('/subjects/{id}', [SubjectController::class, 'update']);
 Route::delete('/subjects/{id}', [SubjectController::class, 'destroy']); 
->>>>>>> feature/subjectApi
