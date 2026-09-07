@@ -16,6 +16,6 @@ class Classes extends Model
         'teacher_id'
     ];
     public function teacher(){
-        // return $this -> belongsTo(teacher::class);
+        return $this -> belongsTo(teacher::class);
     }
 }
