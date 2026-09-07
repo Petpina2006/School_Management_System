@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClassController;
+use App\Http\Controllers\ClassSubjectController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
@@ -30,11 +31,12 @@ Route::post('/teachers', [TeacherController::class, 'store']);
 Route::get('/teachers/{id}', [TeacherController::class, 'show']);
 Route::put('/teachers/{id}', [TeacherController::class, 'update']);
 Route::delete('/teachers/{id}', [TeacherController::class, 'destroy']);
-
+// class
 Route::get('/classes',[ClassController::class, 'index']);
 Route::post('/classes', [ClassController::class, 'store']);
 Route::get('/classes/{id}', [ClassController::class, 'show']);
 Route::put('/classes/{id}', [ClassController::class, 'update']);
+<<<<<<< HEAD
 Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
    
 // subject
@@ -43,3 +45,12 @@ Route::post('/subjects', [SubjectController::class, 'store']);
 Route::get('/subjects/{id}', [SubjectController::class, 'show']);
 Route::put('/subjects/{id}', [SubjectController::class, 'update']);
 Route::delete('/subjects/{id}', [SubjectController::class, 'destroy']); 
+=======
+Route::delete('/classes/{id}', [ClassController::class, 'destroy']);  
+// subject class
+Route::get('/classsubject', [ClassSubjectController::class, 'index']);
+Route::post('/classsubject', [ClassSubjectController::class, 'store']);
+Route::get('/classsubject/{id}', [ClassSubjectController::class, 'show']);
+Route::put('/classsubject/{id}', [ClassSubjectController::class, 'update']);
+Route::delete('/classsubject/{id}', [ClassSubjectController::class, 'destroy']);
+>>>>>>> feature/classsubjectApi
