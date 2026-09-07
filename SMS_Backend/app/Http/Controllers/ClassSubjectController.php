@@ -30,9 +30,9 @@ class ClassSubjectController extends Controller
     {
         try {
             $validated = $request->validate([
-                'class_id'   => 'required|integer|exists:classes,id',
-                'subject_id' => 'required|integer|exists:subjects,id',
-                'teacher_id' => 'required|integer|exists:teachers,id',
+                'class_id' => ['required', 'integer', 'exists:classes,id'],
+                'subject_id' => ['required', 'integer', 'exists:subjects,id'],
+                'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
             ]);
             $classsubject = ClassSubject::create($validated);
             return response()->json([
@@ -85,12 +85,12 @@ class ClassSubjectController extends Controller
                     'message' => 'Canot Update!',
                     'status' => false,
                     'data' => null
-                ],404);
+                ], 404);
             }
             $validated = $request->validate([
-                'class_id'   => 'required|exists:classes,id',
-                'subject_id' => 'required|exists:subjects,id',
-                'teacher_id' => 'required|exists:teachers,id',
+                'class_id' => ['required', 'integer', 'exists:classes,id'],
+                'subject_id' => ['required', 'integer', 'exists:subjects,id'],
+                'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
             ]);
             $classsubject->update($validated);
             return response()->json([
