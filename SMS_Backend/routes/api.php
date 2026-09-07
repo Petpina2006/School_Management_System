@@ -34,4 +34,5 @@ Route::get('/classes',[ClassController::class, 'index']);
 Route::post('/classes', [ClassController::class, 'store']);
 Route::get('/classes/{id}', [ClassController::class, 'show']);
 Route::put('/classes/{id}', [ClassController::class, 'update']);
-Route::delete('/classes/{id}', [ClassController::class, 'destroy']);    
+Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
+   
