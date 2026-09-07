@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -28,3 +29,10 @@ Route::post('/teachers', [TeacherController::class, 'store']);
 Route::get('/teachers/{id}', [TeacherController::class, 'show']);
 Route::put('/teachers/{id}', [TeacherController::class, 'update']);
 Route::delete('/teachers/{id}', [TeacherController::class, 'destroy']);
+
+// subject
+Route::get('/subjects',[SubjectController::class, 'index']);
+Route::post('/subjects', [SubjectController::class, 'store']);
+Route::get('/subjects/{id}', [SubjectController::class, 'show']);
+Route::put('/subjects/{id}', [SubjectController::class, 'update']);
+Route::delete('/subjects/{id}', [SubjectController::class, 'destroy']); 
