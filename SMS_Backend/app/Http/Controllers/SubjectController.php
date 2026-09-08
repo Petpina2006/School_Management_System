@@ -125,7 +125,7 @@ class SubjectController extends Controller
             return response()->json([
                 'message' => 'Update Subject Successfully',
                 'status' => true,
-                'data' => $subject
+                'data' => $subject->fresh()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

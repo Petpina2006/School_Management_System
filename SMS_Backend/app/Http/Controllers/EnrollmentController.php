@@ -133,7 +133,7 @@ class EnrollmentController extends Controller
             return response()->json([
                 'message' => 'Update Enrollment Successfully',
                 'status' => true,
-                'data' => $enrollment
+                'data' => $enrollment->fresh()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

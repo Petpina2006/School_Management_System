@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ClassSubjectController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
@@ -65,3 +66,10 @@ Route::post('/attendance', [Attendance::class, 'store']);
 Route::get('/attendance/{id}', [Attendance::class, 'show']);
 Route::put('/attendance/{id}', [Attendance::class, 'update']);
 Route::delete('/attendance/{id}', [Attendance::class, 'destroy']);
+// score
+Route::get('/scores', [ScoreController::class, 'index']);
+Route::post('/scores', [ScoreController::class, 'store']);
+Route::get('/scores/{id}', [ScoreController::class, 'show']);
+Route::put('/scores/{id}', [ScoreController::class, 'update']);
+Route::delete('/scores/{id}', [ScoreController::class, 'destroy']);
+
