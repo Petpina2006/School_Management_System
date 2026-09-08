@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Classes;
+use App\Models\Student;
+use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class TeacherController extends Controller
@@ -150,6 +154,157 @@ class TeacherController extends Controller
             return response()->json([
                 'message' => 'Update Teacher Fail',
                 'status' => false,
+                'error' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+     /*
+    |--------------------------------------------------------------------------
+    | Teacher Profile
+    |--------------------------------------------------------------------------
+    */
+
+    public function profile()
+    {
+        try {
+
+            $user = Auth::user();
+
+            $teacher = Teacher::with('user')->where('user_id', $user->id)->first();
+            if (!$teacher) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Teacher profile not found',
+                    'data' => null
+                ], 404);
+            }
+            return response()->json([
+                'status' => true,
+                'message' => 'Fetch Teacher Profile Successfully',
+                'data' => $teacher
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Fetch Teacher Profile Failed',
+                'error' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+// my student
+    public function myStudents()
+    {
+        try {
+
+            $user = Auth::user();
+            $teacher = Teacher::where('user_id', $user->id)->first();
+            if (!$teacher) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Teacher profile not found',
+                    'data' => null
+                ], 404);
+            }
+            $students = Student::whereHas('enrollments.class', function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id);
+            })
+            ->with('user')
+            ->distinct()
+            ->get();
+            return response()->json([
+                'status' => true,
+                'message' => 'Fetch My Students Successfully',
+                'data' => $students
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Fetch My Students Failed',
+                'error' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+// myclass
+    public function myClasses()
+    {
+        try {
+
+            $user = Auth::user();
+            $teacher = Teacher::where('user_id', $user->id)->first();
+            if (!$teacher) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Teacher profile not found',
+                    'data' => null
+                ], 404);
+            }
+
+            $classes = Classes::where('teacher_id', $teacher->id)
+                ->with('teacher')
+                ->latest()
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Fetch My Classes Successfully',
+                'data' => $classes
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Fetch My Classes Failed',
+                'error' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+// mysubject
+    public function mySubjects()
+    {
+        try {
+
+            $user = Auth::user();
+            $teacher = Teacher::where('user_id', $user->id)->first();
+            if (!$teacher) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Teacher profile not found',
+                    'data' => null
+                ], 404);
+            }
+            $subjects = Subject::whereHas('classSubjects', function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id);
+            })
+            ->with([
+                'classSubjects' => function ($query) use ($teacher) {
+                    $query->where('teacher_id', $teacher->id)
+                        ->with('class');
+                }
+            ])
+            ->distinct()
+            ->get();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Fetch My Subjects Successfully',
+                'data' => $subjects
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Fetch My Subjects Failed',
                 'error' => $e->getMessage(),
                 'data' => null
             ], 500);
