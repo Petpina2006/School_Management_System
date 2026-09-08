@@ -82,7 +82,7 @@ class ClassSubjectController extends Controller
             $classsubject = ClassSubject::find($id);
             if (!$classsubject) {
                 return response()->json([
-                    'message' => 'Canot Update!',
+                    'message' => 'Canot Update!.',
                     'status' => false,
                     'data' => null
                 ], 404);

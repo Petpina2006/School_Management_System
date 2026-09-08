@@ -64,3 +64,4 @@ Route::post('/scores', [ScoreController::class, 'store']);
 Route::get('/scores/{id}', [ScoreController::class, 'show']);
 Route::put('/scores/{id}', [ScoreController::class, 'update']);
 Route::delete('/scores/{id}', [ScoreController::class, 'destroy']);
+
