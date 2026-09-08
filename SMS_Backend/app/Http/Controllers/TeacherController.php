@@ -160,12 +160,8 @@ class TeacherController extends Controller
         }
     }
 
-     /*
-    |--------------------------------------------------------------------------
-    | Teacher Profile
-    |--------------------------------------------------------------------------
-    */
-
+    
+// Profile
     public function profile()
     {
         try {

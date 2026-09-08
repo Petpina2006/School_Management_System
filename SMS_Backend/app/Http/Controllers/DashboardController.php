@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Classes;
+use App\Models\ClassSubject;
 use App\Models\Enrollment;
 use App\Models\Score;
 use App\Models\Student;
@@ -107,7 +108,7 @@ class DashboardController extends Controller
                 }
             )->distinct('student_id')->count('student_id');
 
-            $subjects = Subject::where('teacher_id',$teacher->id)->count();
+            $subjects = ClassSubject::where('teacher_id',$teacher->id)->count();
             $scores = Score::where('teacher_id',$teacher->id)->count();
             $attendance = Attendance::where('teacher_id',$teacher->id)->count();
             $data = [
