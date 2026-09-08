@@ -137,7 +137,7 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'Update User Successfully',
                 'status' => true,
-                'data' => $user
+                'data' => $user->fresh()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

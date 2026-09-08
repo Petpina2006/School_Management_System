@@ -123,7 +123,7 @@ class ClassSubjectController extends Controller
             return response()->json([
                 'message' => 'Delete Sucessfully.',
                 'status' => true,
-                'data' => $classsubject
+                'data' => $classsubject->fresh()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

@@ -120,7 +120,7 @@ class ClassController extends Controller
             return response()->json([
                 'message' => 'Classed Deleted Successfully.',
                 'status' => true,
-                'data' => $class
+                'data' => $class->fresh()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

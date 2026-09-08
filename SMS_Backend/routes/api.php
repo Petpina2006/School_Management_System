@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ClassSubjectController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
@@ -58,8 +59,8 @@ Route::get('/enrollments/{id}', [EnrollmentController::class, 'show']);
 Route::put('/enrollments/{id}', [EnrollmentController::class, 'update']);
 Route::delete('/enrollments/{id}', [EnrollmentController::class, 'destroy']);
 // score
-Route::get('/scores', [EnrollmentController::class, 'index']);
-Route::post('/scores', [EnrollmentController::class, 'store']);
-Route::get('/scores/{id}', [EnrollmentController::class, 'show']);
-Route::put('/scores/{id}', [EnrollmentController::class, 'update']);
-Route::delete('/scores/{id}', [EnrollmentController::class, 'destroy']);
+Route::get('/scores', [ScoreController::class, 'index']);
+Route::post('/scores', [ScoreController::class, 'store']);
+Route::get('/scores/{id}', [ScoreController::class, 'show']);
+Route::put('/scores/{id}', [ScoreController::class, 'update']);
+Route::delete('/scores/{id}', [ScoreController::class, 'destroy']);
