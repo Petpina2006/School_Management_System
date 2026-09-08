@@ -38,7 +38,6 @@ Route::post('/classes', [ClassController::class, 'store']);
 Route::get('/classes/{id}', [ClassController::class, 'show']);
 Route::put('/classes/{id}', [ClassController::class, 'update']);
 Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
-   
 // subject
 Route::get('/subjects',[SubjectController::class, 'index']);
 Route::post('/subjects', [SubjectController::class, 'store']);
@@ -58,3 +57,9 @@ Route::post('/enrollments', [EnrollmentController::class, 'store']);
 Route::get('/enrollments/{id}', [EnrollmentController::class, 'show']);
 Route::put('/enrollments/{id}', [EnrollmentController::class, 'update']);
 Route::delete('/enrollments/{id}', [EnrollmentController::class, 'destroy']);
+// score
+Route::get('/scores', [EnrollmentController::class, 'index']);
+Route::post('/scores', [EnrollmentController::class, 'store']);
+Route::get('/scores/{id}', [EnrollmentController::class, 'show']);
+Route::put('/scores/{id}', [EnrollmentController::class, 'update']);
+Route::delete('/scores/{id}', [EnrollmentController::class, 'destroy']);
