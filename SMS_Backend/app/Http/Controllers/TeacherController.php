@@ -32,7 +32,7 @@ class TeacherController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => ['required', 'integer', 'exists:users,id'],
+                'user_id' => ['nullable', 'integer', 'exists:users,id'],
                 'teacher_code' => ['required', 'string', 'max:255', 'unique:teachers,teacher_code'],
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name' => ['required', 'string', 'max:255'],
@@ -127,7 +127,7 @@ class TeacherController extends Controller
                 ], 404);
             }
             $validated = $request->validate([
-                'user_id' => ['required', 'integer', 'exists:users,id'],
+                'user_id' => ['nullable', 'integer', 'exists:users,id'],
                 'teacher_code' => ['required','string','max:255',Rule::unique('teachers', 'teacher_code')->ignore($teacher->id)],
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name' => ['required', 'string', 'max:255'],

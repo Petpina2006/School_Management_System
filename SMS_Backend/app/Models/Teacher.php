@@ -25,4 +25,24 @@ class Teacher extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function classes()
+    {
+        return $this->hasMany(Classes::class);
+    }
+
+    public function classSubjects()
+    {
+        return $this->hasMany(ClassSubject::class);
+    }
+
+    public function scores()
+    {
+        return $this->hasMany(Score::class);
+    }
+
+    public function attendance()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }

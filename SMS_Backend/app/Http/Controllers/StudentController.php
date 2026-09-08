@@ -30,7 +30,7 @@ class StudentController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => ['required', 'integer', 'exists:users,id'],
+                'user_id' => ['nullable', 'integer', 'exists:users,id'],
                 'student_code' => ['required', 'string', 'max:50', 'unique:students,student_code'],
                 'Full_name' => ['required', 'string', 'max:255'],
                 'gender' => ['required', 'in:male,female'],
@@ -128,7 +128,7 @@ class StudentController extends Controller
                 ], 404);
             }
             $validated = $request->validate([
-                'user_id' => ['required', 'integer', 'exists:users,id'],
+                'user_id' => ['nullable', 'integer', 'exists:users,id'],
                 'student_code' => ['required','string','max:50',Rule::unique('students', 'student_code')->ignore($student->id),],
                 'Full_name' => ['required', 'string', 'max:255'],
                 'gender' => ['required', Rule::in(['male', 'female'])],

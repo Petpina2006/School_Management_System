@@ -15,5 +15,16 @@ class Attendance extends Model
         'status',
         'remark'
     ];
-
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
+    public function class()
+    {
+        return $this->belongsTo(Classes::class);
+    }
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
 }
