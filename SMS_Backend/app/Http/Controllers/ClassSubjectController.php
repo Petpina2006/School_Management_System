@@ -88,7 +88,7 @@ class ClassSubjectController extends Controller
             $classsubject->update($validated);
             if (!$classsubject) {
                 return response()->json([
-                    'message' => 'Canot Update!',
+                    'message' => 'Canot Update!.',
                     'status' => false,
                     'data' => null
                 ], 404);
