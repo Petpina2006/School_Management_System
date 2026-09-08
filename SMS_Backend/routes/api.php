@@ -7,6 +7,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,7 @@ Route::post('/classes', [ClassController::class, 'store']);
 Route::get('/classes/{id}', [ClassController::class, 'show']);
 Route::put('/classes/{id}', [ClassController::class, 'update']);
 Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
+   
 // subject
 Route::get('/subjects',[SubjectController::class, 'index']);
 Route::post('/subjects', [SubjectController::class, 'store']);
@@ -51,21 +53,15 @@ Route::post('/classsubject', [ClassSubjectController::class, 'store']);
 Route::get('/classsubject/{id}', [ClassSubjectController::class, 'show']);
 Route::put('/classsubject/{id}', [ClassSubjectController::class, 'update']);
 Route::delete('/classsubject/{id}', [ClassSubjectController::class, 'destroy']);
-<<<<<<< HEAD
-=======
 // enrollment
 Route::get('/enrollments', [EnrollmentController::class, 'index']);
 Route::post('/enrollments', [EnrollmentController::class, 'store']);
 Route::get('/enrollments/{id}', [EnrollmentController::class, 'show']);
 Route::put('/enrollments/{id}', [EnrollmentController::class, 'update']);
 Route::delete('/enrollments/{id}', [EnrollmentController::class, 'destroy']);
-<<<<<<< HEAD
->>>>>>> ac726c1f369114eaf4a2b838124ca6c913a0a431
-=======
-// score
-Route::get('/scores', [EnrollmentController::class, 'index']);
-Route::post('/scores', [EnrollmentController::class, 'store']);
-Route::get('/scores/{id}', [EnrollmentController::class, 'show']);
-Route::put('/scores/{id}', [EnrollmentController::class, 'update']);
-Route::delete('/scores/{id}', [EnrollmentController::class, 'destroy']);
->>>>>>> 97da31a9d596262a6bfff5b0039f1329f4ea1d78
+// Attendance
+Route::get('/attendance', [Attendance::class, 'index']);
+Route::post('/attendance', [Attendance::class, 'store']);
+Route::get('/attendance/{id}', [Attendance::class, 'show']);
+Route::put('/attendance/{id}', [Attendance::class, 'update']);
+Route::delete('/attendance/{id}', [Attendance::class, 'destroy']);
