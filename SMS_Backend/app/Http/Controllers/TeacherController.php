@@ -45,12 +45,6 @@ class TeacherController extends Controller
                 'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg', 'max:2048'],
                 'status' => ['nullable', 'in:active,inactive'],
             ]);
-            // if ($request->hasFile('photo')) {
-            //     $file = $request->file('photo');
-            //     $photoName = time() . '.' . $file->getClientOriginalExtension();
-            //     $file->move(public_path('Students'), $photoName);
-            //     $validated['photo'] = $photoName;
-            // }
             $teacher = Teacher::create($validated);
             return response()->json([
                 'message' => "Create Teacher Successfully",
@@ -134,17 +128,17 @@ class TeacherController extends Controller
             }
             $validated = $request->validate([
                 'user_id' => ['required', 'integer', 'exists:users,id'],
-                'teacher_code' => ['required', 'string', 'max:255',Rule::unique('teachers','teacher_code')->ignore($teacher->id)],
+                'teacher_code' => ['required','string','max:255',Rule::unique('teachers', 'teacher_code')->ignore($teacher->id)],
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name' => ['required', 'string', 'max:255'],
-                'gender' => ['required', 'in:male,female'],
+                'gender' => ['required', Rule::in(['male', 'female'])],
                 'date_of_birth' => ['nullable', 'date'],
                 'phone' => ['nullable', 'string', 'max:255'],
                 'address' => ['nullable', 'string'],
                 'hire_date' => ['nullable', 'date'],
                 'specialization' => ['nullable', 'string', 'max:255'],
                 'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg', 'max:2048'],
-                'status' => ['nullable', 'in:active,inactive'],
+                'status' => ['nullable', Rule::in(['active', 'inactive'])],
             ]);
             $teacher->update($validated);
             return response()->json([

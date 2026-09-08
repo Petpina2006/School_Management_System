@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SubjectController extends Controller
 {
@@ -114,11 +115,11 @@ class SubjectController extends Controller
                     'data' => null
                 ], 404);
             }
-           $validated = $request->validate([
-                'subject_code' => ['required', 'string', 'max:255', 'unique:subjects,subject_code'],
+            $validated = $request->validate([
+                'subject_code' => ['required','string','max:255',Rule::unique('subjects', 'subject_code')->ignore($subject->id),],
                 'subject_name' => ['required', 'string', 'max:255'],
                 'description' => ['nullable', 'string'],
-                'status' => ['required', 'in:active,inactive'],
+                'status' => ['required', Rule::in(['active', 'inactive'])],
             ]);
             $subject->update($validated);
             return response()->json([

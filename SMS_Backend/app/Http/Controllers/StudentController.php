@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
 {
@@ -128,16 +129,16 @@ class StudentController extends Controller
             }
             $validated = $request->validate([
                 'user_id' => ['required', 'integer', 'exists:users,id'],
-                'student_code' => ['required', 'string', 'max:50', 'unique:students,student_code'. $id],
+                'student_code' => ['required','string','max:50',Rule::unique('students', 'student_code')->ignore($student->id),],
                 'Full_name' => ['required', 'string', 'max:255'],
-                'gender' => ['required', 'in:male,female'],
+                'gender' => ['required', Rule::in(['male', 'female'])],
                 'date_of_birth' => ['required', 'date'],
                 'phone' => ['required', 'string', 'max:20'],
                 'address' => ['nullable', 'string', 'max:500'],
                 'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg', 'max:2048'],
                 'parent_name' => ['required', 'string', 'max:255'],
                 'parent_phone' => ['required', 'string', 'max:20'],
-                'status' => ['required', 'in:active,inactive'],
+                'status' => ['required', Rule::in(['active', 'inactive'])],
             ]);
             $student->update($validated);
             return response()->json([

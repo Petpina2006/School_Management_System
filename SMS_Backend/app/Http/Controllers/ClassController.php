@@ -20,14 +20,14 @@ class ClassController extends Controller
 
     public function store(Request $request)
     {
-        try{
+        try {
             $validated = $request->validate([
-                'class_name'    => 'required|string|max:255',
-                'grade'         => 'required|string|max:50',
-                'section'       => 'nullable|string|max:50',
-                'room'          => 'nullable|string|max:50',
-                'academic_year' => 'required|string|max:20',
-                'teacher_id'    => 'required|exists:teachers,id'
+                'class_name' => ['required', 'string', 'max:255'],
+                'grade' => ['required', 'string', 'max:50'],
+                'section' => ['nullable', 'string', 'max:50'],
+                'room' => ['nullable', 'string', 'max:50'],
+                'academic_year' => ['required', 'string', 'max:20'],
+                'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
             ]);
             $class = Classes::create($validated);
             return response()->json([
@@ -35,7 +35,7 @@ class ClassController extends Controller
                 'status' => true,
                 'data' => $class
             ], 201);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Classed create false',
                 'status' => false,
@@ -83,12 +83,12 @@ class ClassController extends Controller
                 ], 404);
             }
             $validated = $request->validate([
-                'class_name'    => 'required|string|max:255',
-                'grade'         => 'required|string|max:50',
-                'section'       => 'nullable|string|max:50',
-                'room'          => 'nullable|string|max:50',
-                'academic_year' => 'required|string|max:20',
-                'teacher_id'    => 'required|exists:teachers,id'
+                'class_name' => ['required', 'string', 'max:255'],
+                'grade' => ['required', 'string', 'max:50'],
+                'section' => ['nullable', 'string', 'max:50'],
+                'room' => ['nullable', 'string', 'max:50'],
+                'academic_year' => ['required', 'string', 'max:20'],
+                'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
             ]);
             $class->update($validated);
             return response()->json([
@@ -105,7 +105,8 @@ class ClassController extends Controller
         }
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         try {
             $class = Classes::find($id);
             if (!$class) {

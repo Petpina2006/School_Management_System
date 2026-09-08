@@ -2,26 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Enrollment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
-class UserController extends Controller
+class EnrollmentController extends Controller
 {
-
     public function index()
     {
-        $user = User::oldest()->paginate(10);
+        $enrollment = Enrollment::oldest()->paginate(10);
         try {
             return response()->json([
-                'message' => 'Fetch All Data User Successfully',
+                'message' => 'Fetch All Data Enrollment Successfully',
                 'status' => true,
-                'data' => $user
+                'data' => $enrollment
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => "Fetch Data User Fails",
+                'message' => "Fetch Data Enrollment Fails",
                 'status' => false,
                 'error' => $e->getMessage(),
                 'data' => null
@@ -33,22 +31,21 @@ class UserController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-                'password' => ['required', 'string', 'min:8'],
-                'role' => ['required', 'string', Rule::in(['super_admin','admin','teacher','student',])],
-                'status' => ['nullable', 'string', Rule::in(['active','inactive',])],
+                'student_id' => ['required', 'integer', 'exists:students,id'],
+                'class_id' => ['required', 'integer', 'exists:classes,id'],
+                'academic_year' => ['required', 'string', 'max:20'],
+                'enrollment_date' => ['required', 'date'],
+                'status' => ['nullable', 'in:active,completed,cancelled'],
             ]);
-            $validate['password'] = Hash::make($validated['password']);
-            $user = User::create($validated);
+            $enrollment = Enrollment::create($validated);
             return response()->json([
-                'message' => "Create User Successfully",
+                'message' => "Create Enrollment Successfully",
                 'status' => true,
-                'data' => $user
+                'data' => $enrollment
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Create User fail',
+                'message' => 'Create Enrollment fail',
                 'status' => false,
                 'error' => $e->getMessage(),
                 'data' => null
@@ -59,22 +56,22 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-            $user = User::find($id);
-            if (!$user) {
+            $enrollment = Enrollment::find($id);
+            if (!$enrollment) {
                 return response()->json([
-                    'message' => 'User not found',
+                    'message' => 'Enrollment not found',
                     'status' => false,
                     'data' => null
                 ], 404);
             }
             return response()->json([
-                'message' => 'User found successfully',
+                'message' => 'Enrollment found successfully',
                 'status' => true,
-                'data' => $user
+                'data' => $enrollment
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'User Show Fail',
+                'message' => 'Enrollment Show Fail',
                 'status' => false,
                 'error' => $e->getMessage(),
                 'data' => null
@@ -85,23 +82,23 @@ class UserController extends Controller
     public function destroy($id)
     {
         try {
-            $user = User::find($id);
-            if (!$user) {
+            $enrollment = Enrollment::find($id);
+            if (!$enrollment) {
                 return response()->json([
-                    'message' => 'User not found',
+                    'message' => 'Enrollment not found',
                     'status' => false,
                     'data' => null
                 ], 404);
             }
-            $user->delete();
+            $enrollment->delete();
             return response()->json([
-                'message' => 'Delete User Successfully',
+                'message' => 'Delete Enrollment Successfully',
                 'status' => true,
-                'data' => $user
+                'data' => $enrollment
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Delete User Fail',
+                'message' => 'Delete Enrollment Fail',
                 'status' => false,
                 'error' => $e->getMessage(),
                 'data' => null
@@ -113,35 +110,34 @@ class UserController extends Controller
     {
 
         try {
-            $user = User::find($id);
-            if (!$user) {
+            $enrollment = Enrollment::find($id);
+            if (!$enrollment) {
                 return response()->json([
-                    'message' => 'User not found',
+                    'message' => 'Enrollment not found',
                     'status' => false,
                     'data' => null
                 ], 404);
             }
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required','string','email','max:255',Rule::unique('users', 'email')->ignore($user->id),],
-                'password' => ['nullable', 'string', 'min:8'],
-                'role' => ['required', Rule::in(['super_admin','admin','teacher','student',])],
-                'status' => ['nullable', Rule::in(['active','inactive',])],
+                'student_id' => ['required','integer','exists:students,id',
+                    Rule::unique('enrollments', 'student_id')
+                        ->where('academic_year', $request->academic_year)
+                        ->ignore($enrollment->id),
+                ],
+                'class_id' => ['required', 'integer', 'exists:classes,id'],
+                'academic_year' => ['required', 'string', 'max:20'],
+                'enrollment_date' => ['required', 'date'],
+                'status' => ['required', Rule::in(['active','completed','cancelled',])],
             ]);
-            if (!empty($validated['password'])) {
-                $validated['password'] = Hash::make($validated['password']);
-            } else {
-                unset($validated['password']);
-            }
-            $user->update($validated);
+            $enrollment->update($validated);
             return response()->json([
-                'message' => 'Update User Successfully',
+                'message' => 'Update Enrollment Successfully',
                 'status' => true,
-                'data' => $user
+                'data' => $enrollment
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Update User Fail',
+                'message' => 'Update Enrollment Fail',
                 'status' => false,
                 'error' => $e->getMessage(),
                 'data' => null

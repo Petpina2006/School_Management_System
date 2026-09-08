@@ -30,9 +30,9 @@ class ClassSubjectController extends Controller
     {
         try {
             $validated = $request->validate([
-                'class_id'   => 'required|exists:classes,id',
-                'subject_id' => 'required|exists:subjects,id',
-                'teacher_id' => 'required|exists:teachers,id',
+                'class_id' => ['required', 'integer', 'exists:classes,id'],
+                'subject_id' => ['required', 'integer', 'exists:subjects,id'],
+                'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
             ]);
             $classsubject = ClassSubject::create($validated);
             return response()->json([
@@ -80,12 +80,6 @@ class ClassSubjectController extends Controller
     {
         try {
             $classsubject = ClassSubject::find($id);
-            $validated = $request->validate([
-                'class_id'   => 'required|exists:classes,id',
-                'subject_id' => 'required|exists:subjects,id',
-                'teacher_id' => 'required|exists:teachers,id',
-            ]);
-            $classsubject->update($validated);
             if (!$classsubject) {
                 return response()->json([
                     'message' => 'Canot Update!.',
@@ -93,6 +87,12 @@ class ClassSubjectController extends Controller
                     'data' => null
                 ], 404);
             }
+            $validated = $request->validate([
+                'class_id' => ['required', 'integer', 'exists:classes,id'],
+                'subject_id' => ['required', 'integer', 'exists:subjects,id'],
+                'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
+            ]);
+            $classsubject->update($validated);
             return response()->json([
                 'message' => 'ClassSubject Update Successfully.',
                 'status' => true,
@@ -112,7 +112,6 @@ class ClassSubjectController extends Controller
     {
         try {
             $classsubject = ClassSubject::find($id);
-            $classsubject->delete();
             if (!$classsubject) {
                 return response()->json([
                     'message' => 'Cant Delte!',
@@ -120,6 +119,7 @@ class ClassSubjectController extends Controller
                     'data' => null
                 ], 404);
             }
+            $classsubject->delete();
             return response()->json([
                 'message' => 'Delete Sucessfully.',
                 'status' => true,

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ClassSubjectController;
+use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
@@ -51,3 +52,12 @@ Route::post('/classsubject', [ClassSubjectController::class, 'store']);
 Route::get('/classsubject/{id}', [ClassSubjectController::class, 'show']);
 Route::put('/classsubject/{id}', [ClassSubjectController::class, 'update']);
 Route::delete('/classsubject/{id}', [ClassSubjectController::class, 'destroy']);
+<<<<<<< HEAD
+=======
+// enrollment
+Route::get('/enrollments', [EnrollmentController::class, 'index']);
+Route::post('/enrollments', [EnrollmentController::class, 'store']);
+Route::get('/enrollments/{id}', [EnrollmentController::class, 'show']);
+Route::put('/enrollments/{id}', [EnrollmentController::class, 'update']);
+Route::delete('/enrollments/{id}', [EnrollmentController::class, 'destroy']);
+>>>>>>> ac726c1f369114eaf4a2b838124ca6c913a0a431
