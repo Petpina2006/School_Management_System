@@ -12,7 +12,7 @@ class UserController extends Controller
 
     public function index()
     {
-        $user = User::oldest()->paginate(10);
+        $user = User::oldest('id')->paginate(10);
         try {
             return response()->json([
                 'message' => 'Fetch All Data User Successfully',

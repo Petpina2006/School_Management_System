@@ -10,7 +10,7 @@ class StudentController extends Controller
 {
     public function index()
     {
-        $student = Student::oldest()->paginate(10);
+        $student = Student::oldest('id')->paginate(10);
         try {
             return response()->json([
                 'message' => 'Fetch All Data Student Successfully',
