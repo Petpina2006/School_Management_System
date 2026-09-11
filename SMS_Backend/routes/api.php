@@ -43,10 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:super_admin')->group(function () {
+    Route::prefix('super-admin')->middleware('role:super_admin')->group(function () {
 
         // Dashboard
-        Route::get('/super-admin/dashboard', [DashboardController::class,'superAdminDashboard']);
+        Route::get('/dashboard', [DashboardController::class,'superAdminDashboard']);
         // Users
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
@@ -110,7 +110,7 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:admin')->group(function () {
+    Route::prefix('sadmin')->middleware('role:admin')->group(function () {
 
         // Dashboard
         Route::get('/admin/dashboard', [DashboardController::class,'adminDashboard']);
