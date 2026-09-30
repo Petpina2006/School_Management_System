@@ -4,76 +4,95 @@ import {
     Mail,
     Phone,
     MapPin,
-    BadgeCheck,
+    ShieldCheck,
     Pencil,
     Save,
     X,
-    VenusAndMars,
+    BadgeCheck,
 } from "lucide-react";
 
-import { updateTeacherProfile } from "../../../services/teachers/teacherApi";
+import {
+    updateSuperAdminProfile,
+} from "../../../services/super-admin/superAdminApi";
 
-export default function TeacherProfileCard({ teacher, onUpdated }) {
+export default function SuperAdminProfileCard({
+    admin,
+    onUpdated,
+}) {
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
+
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
     const [form, setForm] = useState({
         first_name: "",
         last_name: "",
-        gender: "",
         phone: "",
         address: "",
     });
 
-    // ==============================
-    // Load teacher data into form
-    // ==============================
+    // ==========================================
+    // Load data
+    // ==========================================
+
     useEffect(() => {
-        if (teacher) {
+        if (admin) {
+            const fullName = admin.name || "";
+
+            const nameParts = fullName.trim().split(" ");
+
             setForm({
-                first_name: teacher.first_name || "",
-                last_name: teacher.last_name || "",
-                gender: teacher.gender || "",
-                phone: teacher.phone || "",
-                address: teacher.address || "",
+                first_name:
+                    admin.first_name ||
+                    nameParts[0] ||
+                    "",
+
+                last_name:
+                    admin.last_name ||
+                    nameParts.slice(1).join(" ") ||
+                    "",
+
+                phone: admin.phone || "",
+                address: admin.address || "",
             });
         }
-    }, [teacher]);
+    }, [admin]);
 
-    if (!teacher) {
-        return (
-            <div className="rounded-2xl bg-white p-8 text-center shadow-sm dark:bg-slate-900">
-                <p className="text-slate-500">
-                    Teacher profile not found.
-                </p>
-            </div>
-        );
+    if (!admin) {
+        return null;
     }
 
-    // ==============================
-    // Full name
-    // ==============================
+    // ==========================================
+    // Full Name
+    // ==========================================
+
     const fullName =
-        `${teacher.first_name || ""} ${teacher.last_name || ""}`.trim() ||
-        "N/A";
+        admin.first_name || admin.last_name
+            ? `${admin.first_name || ""} ${
+                  admin.last_name || ""
+              }`.trim()
+            : admin.name || "Super Admin";
 
-    // ==============================
-    // Avatar initial
-    // ==============================
+    // ==========================================
+    // Avatar Initial
+    // ==========================================
+
     const initial =
-        teacher.first_name?.charAt(0)?.toUpperCase() || "T";
+        fullName.charAt(0).toUpperCase() || "S";
 
-    // ==============================
+    // ==========================================
     // Status
-    // ==============================
-    const isActive =
-        (teacher.status || "").toLowerCase() === "active";
+    // ==========================================
 
-    // ==============================
-    // Handle input change
-    // ==============================
+    const isActive =
+        (admin.status || "active").toLowerCase() ===
+        "active";
+
+    // ==========================================
+    // Handle Input
+    // ==========================================
+
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -83,9 +102,10 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
         }));
     };
 
-    // ==============================
-    // Save profile
-    // ==============================
+    // ==========================================
+    // Save
+    // ==========================================
+
     const handleSave = async (e) => {
         e.preventDefault();
 
@@ -94,56 +114,71 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
             setError("");
             setSuccess("");
 
-            // Send only fields allowed by backend
-            const response = await updateTeacherProfile({
-                first_name: form.first_name,
-                last_name: form.last_name,
-                gender: form.gender,
-                phone: form.phone,
-                address: form.address,
-            });
+            const response =
+                await updateSuperAdminProfile({
+                    first_name: form.first_name,
+                    last_name: form.last_name,
+                    phone: form.phone,
+                    address: form.address,
+                });
 
-            console.log("Update Teacher Response:", response);
+            console.log(
+                "Update Super Admin Response:",
+                response
+            );
 
-            const updatedTeacher = response?.data;
+            const updatedAdmin = response?.data;
 
-            if (!updatedTeacher) {
+            if (!updatedAdmin) {
                 throw new Error(
-                    "Updated teacher data not found."
+                    "Updated profile data not found."
                 );
             }
 
-            // Update parent state
-            onUpdated?.(updatedTeacher);
+            onUpdated?.(updatedAdmin);
 
             setSuccess(
-                "Teacher profile updated successfully."
+                "Profile updated successfully."
             );
 
             setEditing(false);
-
         } catch (err) {
-            console.error("Update Teacher Error:", err);
+            console.error(
+                "Update Super Admin Error:",
+                err
+            );
 
             setError(
                 err?.message ||
-                    "Failed to update teacher profile."
+                    "Failed to update profile."
             );
         } finally {
             setSaving(false);
         }
     };
 
-    // ==============================
-    // Cancel editing
-    // ==============================
+    // ==========================================
+    // Cancel
+    // ==========================================
+
     const handleCancel = () => {
+        const fullName = admin.name || "";
+
+        const nameParts = fullName.trim().split(" ");
+
         setForm({
-            first_name: teacher.first_name || "",
-            last_name: teacher.last_name || "",
-            gender: teacher.gender || "",
-            phone: teacher.phone || "",
-            address: teacher.address || "",
+            first_name:
+                admin.first_name ||
+                nameParts[0] ||
+                "",
+
+            last_name:
+                admin.last_name ||
+                nameParts.slice(1).join(" ") ||
+                "",
+
+            phone: admin.phone || "",
+            address: admin.address || "",
         });
 
         setError("");
@@ -154,42 +189,53 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
     return (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
 
-            {/* =====================================================
-                HEADER
-            ====================================================== */}
+            {/* ==========================================
+                PROFILE HEADER
+            ========================================== */}
+
             <div className="border-b border-slate-200 p-6 dark:border-slate-800">
 
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
-                    {/* Teacher Information */}
+                    {/* Profile */}
                     <div className="flex items-center gap-4">
 
                         {/* Avatar */}
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 text-3xl font-bold text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
                             {initial}
                         </div>
 
+                        {/* Name */}
                         <div>
+
                             <div className="flex items-center gap-2">
 
                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                                     {fullName}
                                 </h2>
 
-                                {isActive && (
-                                    <BadgeCheck
-                                        size={20}
-                                        className="text-emerald-500"
-                                    />
-                                )}
+                                <BadgeCheck
+                                    size={20}
+                                    className="text-indigo-500"
+                                />
 
                             </div>
 
-                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                Teacher ID: {teacher.teacher_code || "N/A"}
-                            </p>
+                            <div className="mt-1 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
-                            <div className="mt-2">
+                                <ShieldCheck
+                                    size={16}
+                                />
+
+                                <span>
+                                    Super Administrator
+                                </span>
+
+                            </div>
+
+                            {/* Status */}
+                            <div className="mt-3">
+
                                 <span
                                     className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
                                         isActive
@@ -197,13 +243,16 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
                                             : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                                     }`}
                                 >
-                                    {teacher.status || "Unknown"}
+                                    {admin.status ||
+                                        "Active"}
                                 </span>
+
                             </div>
+
                         </div>
                     </div>
 
-                    {/* Edit Button */}
+                    {/* Edit */}
                     {!editing && (
                         <button
                             type="button"
@@ -221,9 +270,9 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
                 </div>
             </div>
 
-            {/* =====================================================
-                MESSAGES
-            ====================================================== */}
+            {/* ==========================================
+                MESSAGE
+            ========================================== */}
 
             {error && (
                 <div className="mx-6 mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-400">
@@ -237,97 +286,148 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
                 </div>
             )}
 
-            {/* =====================================================
+            {/* ==========================================
                 CONTENT
-            ====================================================== */}
+            ========================================== */}
 
             <div className="p-6">
 
                 {!editing ? (
 
-                    // =================================================
-                    // VIEW MODE
-                    // =================================================
+                    /* =====================================
+                       VIEW MODE
+                    ===================================== */
+
                     <div>
 
                         <h3 className="mb-5 flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+
                             <User size={20} />
-                            Personal & Contact Information
+
+                            Personal & Contact
+                            Information
+
                         </h3>
 
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-                            {/* Teacher Code */}
+                            {/* User ID */}
                             <InfoItem
-                                icon={<BadgeCheck size={18} />}
-                                label="Teacher Code"
-                                value={teacher.teacher_code}
+                                icon={
+                                    <ShieldCheck
+                                        size={18}
+                                    />
+                                }
+                                label="User ID"
+                                value={
+                                    admin.id
+                                }
                             />
 
                             {/* First Name */}
                             <InfoItem
-                                icon={<User size={18} />}
+                                icon={
+                                    <User
+                                        size={18}
+                                    />
+                                }
                                 label="First Name"
-                                value={teacher.first_name}
+                                value={
+                                    admin.first_name ||
+                                    fullName
+                                        .split(" ")[0]
+                                }
                             />
 
                             {/* Last Name */}
                             <InfoItem
-                                icon={<User size={18} />}
+                                icon={
+                                    <User
+                                        size={18}
+                                    />
+                                }
                                 label="Last Name"
-                                value={teacher.last_name}
+                                value={
+                                    admin.last_name ||
+                                    fullName
+                                        .split(" ")
+                                        .slice(1)
+                                        .join(" ")
+                                }
                             />
 
-                            {/* Gender */}
+                            {/* Email */}
                             <InfoItem
-                                icon={<VenusAndMars size={18} />}
-                                label="Gender"
+                                icon={
+                                    <Mail
+                                        size={18}
+                                    />
+                                }
+                                label="Email Address"
                                 value={
-                                    teacher.gender
-                                        ? teacher.gender
-                                              .charAt(0)
-                                              .toUpperCase() +
-                                          teacher.gender.slice(1)
-                                        : "N/A"
+                                    admin.email
                                 }
                             />
 
                             {/* Phone */}
                             <InfoItem
-                                icon={<Phone size={18} />}
+                                icon={
+                                    <Phone
+                                        size={18}
+                                    />
+                                }
                                 label="Phone Number"
-                                value={teacher.phone}
+                                value={
+                                    admin.phone
+                                }
                             />
 
-                            {/* Email */}
+                            {/* Role */}
                             <InfoItem
-                                icon={<Mail size={18} />}
-                                label="Email Address"
-                                value={teacher.email}
+                                icon={
+                                    <ShieldCheck
+                                        size={18}
+                                    />
+                                }
+                                label="Role"
+                                value="Super Admin"
                             />
 
                             {/* Address */}
                             <div className="sm:col-span-2 lg:col-span-3">
+
                                 <InfoItem
-                                    icon={<MapPin size={18} />}
-                                    label="Residential Address"
-                                    value={teacher.address}
+                                    icon={
+                                        <MapPin
+                                            size={18}
+                                        />
+                                    }
+                                    label="Address"
+                                    value={
+                                        admin.address
+                                    }
                                 />
+
                             </div>
 
                         </div>
+
                     </div>
 
                 ) : (
 
-                    // =================================================
-                    // EDIT MODE
-                    // =================================================
+                    /* =====================================
+                       EDIT MODE
+                    ===================================== */
+
                     <form onSubmit={handleSave}>
 
                         <h3 className="mb-6 flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+
                             <Pencil size={20} />
-                            Edit Teacher Profile
+
+                            Edit Profile
+
                         </h3>
 
                         <div className="grid gap-5 sm:grid-cols-2">
@@ -336,8 +436,12 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
                             <FormInput
                                 label="First Name"
                                 name="first_name"
-                                value={form.first_name}
-                                onChange={handleChange}
+                                value={
+                                    form.first_name
+                                }
+                                onChange={
+                                    handleChange
+                                }
                                 placeholder="Enter first name"
                                 required
                             />
@@ -346,58 +450,29 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
                             <FormInput
                                 label="Last Name"
                                 name="last_name"
-                                value={form.last_name}
-                                onChange={handleChange}
+                                value={
+                                    form.last_name
+                                }
+                                onChange={
+                                    handleChange
+                                }
                                 placeholder="Enter last name"
                                 required
                             />
 
-                            {/* Gender */}
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    Gender
-                                </label>
-
-                                <select
-                                    name="gender"
-                                    value={form.gender}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                                >
-                                    <option value="">
-                                        Select Gender
-                                    </option>
-
-                                    <option value="male">
-                                        Male
-                                    </option>
-
-                                    <option value="female">
-                                        Female
-                                    </option>
-                                </select>
-                            </div>
-
-                            {/* Phone */}
-                            <FormInput
-                                label="Phone Number"
-                                name="phone"
-                                type="text"
-                                value={form.phone}
-                                onChange={handleChange}
-                                placeholder="Enter phone number"
-                            />
-
                             {/* Email */}
                             <div>
+
                                 <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                                     Email Address
                                 </label>
 
                                 <input
                                     type="email"
-                                    value={teacher.email || ""}
+                                    value={
+                                        admin.email ||
+                                        ""
+                                    }
                                     disabled
                                     className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
                                 />
@@ -405,25 +480,44 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
                                 <p className="mt-1 text-xs text-slate-400">
                                     Email cannot be changed here.
                                 </p>
+
                             </div>
+
+                            {/* Phone */}
+                            <FormInput
+                                label="Phone Number"
+                                name="phone"
+                                value={
+                                    form.phone
+                                }
+                                onChange={
+                                    handleChange
+                                }
+                                placeholder="Enter phone number"
+                            />
 
                             {/* Address */}
                             <div className="sm:col-span-2">
 
                                 <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    Residential Address
+                                    Address
                                 </label>
 
                                 <textarea
                                     name="address"
-                                    value={form.address}
-                                    onChange={handleChange}
+                                    value={
+                                        form.address
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
                                     rows={4}
-                                    placeholder="Enter residential address"
-                                    className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                    placeholder="Enter address"
+                                    className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                                 />
 
                             </div>
+
                         </div>
 
                         {/* Buttons */}
@@ -432,9 +526,11 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
                             {/* Cancel */}
                             <button
                                 type="button"
-                                onClick={handleCancel}
+                                onClick={
+                                    handleCancel
+                                }
                                 disabled={saving}
-                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                             >
                                 <X size={17} />
                                 Cancel
@@ -454,6 +550,7 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
                             </button>
 
                         </div>
+
                     </form>
                 )}
             </div>
@@ -466,16 +563,22 @@ export default function TeacherProfileCard({ teacher, onUpdated }) {
    INFO ITEM
 ============================================================ */
 
-function InfoItem({ icon, label, value }) {
+function InfoItem({
+    icon,
+    label,
+    value,
+}) {
     return (
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
 
             <div className="mb-2 flex items-center gap-2 text-slate-400">
+
                 {icon}
 
                 <span className="text-xs font-medium uppercase tracking-wide">
                     {label}
                 </span>
+
             </div>
 
             <p className="break-words text-sm font-medium text-slate-900 dark:text-white">
@@ -494,10 +597,10 @@ function InfoItem({ icon, label, value }) {
 function FormInput({
     label,
     name,
-    type = "text",
     value,
     onChange,
     placeholder,
+    type = "text",
     required = false,
 }) {
     return (

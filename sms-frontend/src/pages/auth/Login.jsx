@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-
 import {
   Mail,
   Lock,
@@ -20,17 +19,14 @@ import {
   MapPin,
   Globe,
 } from "lucide-react";
-
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-
 import { loginUser } from "../../services/authApi";
 import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
 
-  // Get login function from AuthContext
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -42,92 +38,140 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Handle input
+  // =========================
+  // Handle Input
+  // =========================
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+
+    // Clear error when user starts typing
+    if (error) {
+      setError("");
+    }
   };
 
+  // =========================
   // Login
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
+
+    if (!formData.email.trim() || !formData.password) {
+      setError("Please enter your email and password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-        const result = await loginUser(formData);
+      const result = await loginUser({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
 
-        console.log("LOGIN RESPONSE:", result);
+      console.log("LOGIN RESPONSE:", result);
 
-        // Laravel returns user inside "data"
-        const user = result.data;
-        const token = result.token;
+      // Laravel response:
+      // {
+      //   message: "...",
+      //   token: "...",
+      //   data: {...user}
+      // }
 
-        if (!token || !user) {
-            throw new Error("Invalid login response from server.");
-        }
+      const token = result?.token;
+      const user = result?.data;
 
-        // Save authentication
-        login(token, user);
+      if (!token) {
+        throw new Error("Authentication token was not returned by the server.");
+      }
 
-        // Redirect based on role
-        switch (user.role) {
-            case "super_admin":
-                navigate("/super-admin/dashboard", {
-                    replace: true,
-                });
-                break;
+      if (!user) {
+        throw new Error("User information was not returned by the server.");
+      }
 
-            case "admin":
-                navigate("/admin/dashboard", {
-                    replace: true,
-                });
-                break;
+      if (!user.role) {
+        throw new Error("Your account does not have a valid role.");
+      }
 
-            case "teacher":
-                navigate("/teacher/dashboard", {
-                    replace: true,
-                });
-                break;
+      // =========================
+      // Save Authentication
+      // =========================
+      login(token, user);
 
-            case "student":
-                navigate("/student/dashboard", {
-                    replace: true,
-                });
-                break;
+      // =========================
+      // Redirect Based on Role
+      // =========================
+      switch (user.role) {
+        case "super_admin":
+          navigate("/super-admin/dashboard", {
+            replace: true,
+          });
+          break;
 
-            default:
-                setError("Your account role is not authorized.");
-        }
+        case "admin":
+          navigate("/admin/dashboard", {
+            replace: true,
+          });
+          break;
 
+        case "teacher":
+          navigate("/teacher/dashboard", {
+            replace: true,
+          });
+          break;
+
+        case "student":
+          navigate("/student/dashboard", {
+            replace: true,
+          });
+          break;
+
+        default:
+          setError("Your account role is not authorized.");
+      }
     } catch (err) {
-        console.error("LOGIN ERROR:", err);
+      console.error("LOGIN ERROR:", err);
 
-        setError(
-            err.message ||
-            "Invalid email or password. Please try again."
-        );
+      // Laravel validation errors
+      if (err?.errors) {
+        const firstError = Object.values(err.errors)?.[0];
+
+        if (Array.isArray(firstError) && firstError.length > 0) {
+          setError(firstError[0]);
+        } else {
+          setError("Please check your login information.");
+        }
+      } else if (err?.message) {
+        setError(err.message);
+      } else {
+        setError("Invalid email or password. Please try again.");
+      }
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
 
-  // Google / GitHub
+  // =========================
+  // Google / GitHub Login
+  // =========================
   const handleSocialLogin = (provider) => {
-    window.location.href = `http://127.0.0.1:8000/api/auth/${provider}`;
+    const apiUrl =
+      import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
+    window.location.href = `${apiUrl}/auth/${provider}`;
   };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-slate-950 font-sans text-slate-100 overflow-hidden">
       {/* ================= LEFT SECTION ================= */}
-
       <div className="hidden lg:flex flex-col justify-between p-12 bg-slate-950 relative overflow-hidden border-r border-slate-800/60 select-none">
         {/* Glow */}
         <div className="absolute top-1/4 -left-20 w-80 h-80 rounded-full bg-blue-600/15 blur-[120px] pointer-events-none" />
-
         <div className="absolute bottom-10 right-0 w-96 h-96 rounded-full bg-indigo-600/15 blur-[120px] pointer-events-none" />
 
         {/* Brand */}
@@ -193,7 +237,6 @@ const Login = () => {
             <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md">
               <div className="flex items-center gap-2 text-blue-400 mb-1">
                 <Building className="w-4 h-4" />
-
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                   Classes
                 </span>
@@ -215,7 +258,9 @@ const Login = () => {
                 </span>
               </div>
 
-              <p className="text-xl font-bold text-white">Science & Social</p>
+              <p className="text-xl font-bold text-white">
+                Science & Social
+              </p>
 
               <p className="text-[10px] text-slate-500 mt-0.5">
                 Grades 11 & 12
@@ -301,7 +346,6 @@ const Login = () => {
       </div>
 
       {/* ================= RIGHT SECTION ================= */}
-
       <div className="flex items-center justify-center p-6 sm:p-12 relative my-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}

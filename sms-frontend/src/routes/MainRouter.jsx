@@ -30,6 +30,7 @@ import TeacherClasses from "../pages/teacher/TeacherClasses";
 import TeacherSubjects from "../pages/teacher/TeacherSubjects";
 import TeacherScores from "../pages/teacher/TeacherScores";
 import TeacherAttendance from "../pages/teacher/TeacherAttendance";
+import SuperAdminProfile from "../pages/super-admin/SuperAdminProfile";
 const MainRouter = () => {
   return (
     <>
@@ -44,6 +45,7 @@ const MainRouter = () => {
           <Route element={<RoleRoute allowedRoles={["super_admin"]} />}>
             <Route path="/super-admin" element={<SuperAdminLayout />}>
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="profile" element={<SuperAdminProfile />} />
               <Route path="users" element={<Users />} />
               <Route
                 path="/super-admin/users/create"

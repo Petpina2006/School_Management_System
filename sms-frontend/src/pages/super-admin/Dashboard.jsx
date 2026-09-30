@@ -15,7 +15,7 @@ import {
   Activity,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getSuperAdminDashboard } from "../../services/superAdminApi";
+import { getSuperAdminDashboard } from "../../services/super-admin/superAdminApi";
 import Charts from "../../components/super-admin/Charts";
 
 const Dashboard = () => {

@@ -1,83 +1,141 @@
-
 import React, { useEffect, useState } from "react";
+
 import TeacherStats from "../../components/teacher/dashboard/TeacherStats";
 import TeacherOverview from "../../components/teacher/dashboard/TeacherOverview";
 import { getTeacherDashboard } from "../../services/teachers/teacherApi";
 
-export default function TeacherDashboard() {
-    const [dashboard, setDashboard] = useState({});
+const TeacherDashboard = () => {
+
+    const [data, setData] = useState({
+        total_classes: 0,
+        total_students: 0,
+        total_subjects: 0,
+        total_scores: 0,
+        total_attendance: 0,
+        class_data: [],
+        attendance_data: [],
+    });
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        const loadDashboard = async () => {
-            try {
-                const response = await getTeacherDashboard();
-                setDashboard(response?.data ?? response);
-            } catch (err) {
-                console.error(err);
-                setError("Failed to load dashboard statistics. Please try again later.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         loadDashboard();
     }, []);
 
+    const loadDashboard = async () => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const result = await getTeacherDashboard();
+
+            console.log("Teacher Dashboard API:", result);
+
+            // Laravel response is:
+            // { status, message, data }
+            const dashboardData = result.data ?? {};
+
+            console.log("Dashboard Data:", dashboardData);
+
+            setData({
+                total_classes: dashboardData.total_classes ?? 0,
+                total_students: dashboardData.total_students ?? 0,
+                total_subjects: dashboardData.total_subjects ?? 0,
+                total_scores: dashboardData.total_scores ?? 0,
+                total_attendance: dashboardData.total_attendance ?? 0,
+
+                class_data: Array.isArray(dashboardData.class_data)
+                    ? dashboardData.class_data
+                    : [],
+
+                attendance_data: Array.isArray(
+                    dashboardData.attendance_data
+                )
+                    ? dashboardData.attendance_data
+                    : [],
+            });
+
+        } catch (error) {
+
+            console.error("Teacher Dashboard Error:", error);
+
+            setError(
+                error?.message ||
+                "Failed to load teacher dashboard."
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
+    // =========================================================
+    // Loading
+    // =========================================================
+
     if (loading) {
         return (
-            <div className="flex min-h-[450px] flex-col items-center justify-center space-y-3">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-                <p className="text-sm font-medium text-slate-500">Preparing your dashboard...</p>
+            <div className="flex min-h-[500px] items-center justify-center">
+
+                <div className="text-center">
+
+                    <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600" />
+
+                    <p className="mt-4 text-sm text-slate-500">
+                        Loading teacher dashboard...
+                    </p>
+
+                </div>
+
             </div>
         );
     }
+
+    // =========================================================
+    // Error
+    // =========================================================
 
     if (error) {
         return (
-            <div className="mx-auto my-6 max-w-xl rounded-2xl border border-red-200 bg-red-50/70 p-6 text-center text-red-700 shadow-sm">
-                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
-                    ⚠️️
-                </div>
-                <h3 className="text-base font-semibold">Unable to Load Portal</h3>
-                <p className="mt-1 text-sm text-red-600/90">{error}</p>
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+
+                <h3 className="font-bold text-red-700">
+                    Dashboard Error
+                </h3>
+
+                <p className="mt-2 text-sm text-red-600">
+                    {error}
+                </p>
+
                 <button
-                    onClick={() => window.location.reload()}
-                    className="mt-4 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-700"
+                    onClick={loadDashboard}
+                    className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
                 >
-                    Retry Loading
+                    Try Again
                 </button>
+
             </div>
         );
     }
 
+    // =========================================================
+    // Dashboard
+    // =========================================================
+
     return (
-        <div className="mx-auto max-w-8xl space-y-8 p-4 sm:p-6 lg:p-8">
-            {/* Header Section */}
-            <div className="flex flex-col gap-1 border-b border-slate-200/60 pb-5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-                        Teacher Dashboard
-                    </h1>
-                    <p className="mt-1 text-sm text-slate-500">
-                        Monitor active classes, student counts, and overall portal activities.
-                    </p>
-                </div>
+        <div className="space-y-6">
 
-                <div className="mt-4 sm:mt-0 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                        System Active
-                    </span>
-                </div>
-            </div>
+            {/* Statistics Cards */}
+            <TeacherStats data={data} />
 
-            {/* Overview / Banner Section */}
-            <TeacherOverview data={dashboard} />
+            {/* Overview + Charts */}
+            <TeacherOverview data={data} />
 
-            {/* Metric Cards Section */}
-            <TeacherStats stats={dashboard} />
         </div>
     );
-}
+};
+
+export default TeacherDashboard;

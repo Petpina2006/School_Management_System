@@ -1,6 +1,18 @@
-import { apiFetch } from "./api";
+import { apiFetch } from "../api";
 
 export const getSuperAdminDashboard = () => apiFetch("/super-admin/dashboard");
+// Get Super Admin Profile
+export const getSuperAdminProfile = async () => {
+    return await apiFetch("/super-admin/profile");
+};
+
+// Update Super Admin Profile
+export const updateSuperAdminProfile = async (data) => {
+    return await apiFetch("/super-admin/profile", {
+        method: "PUT",
+        body: JSON.stringify(data),
+    });
+};
 // export {
 //   getUsers,
 //   getUser,

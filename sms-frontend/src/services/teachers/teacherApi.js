@@ -10,6 +10,13 @@ export const getTeacherProfile = async () => {
     return await apiFetch("/teacher/profile");
 };
 
+export const updateTeacherProfile = async (data) => {
+    return await apiFetch("/teacher/profile", {
+        method: "PUT",
+        body: JSON.stringify(data),
+    });
+};
+
 // Students
 export const getTeacherStudents = async () => {
     return await apiFetch("/teacher/students");

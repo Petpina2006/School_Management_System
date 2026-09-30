@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+
 // GET ALL USERS
 export const getUsers = async (page = 1) => {
     return await apiFetch(
