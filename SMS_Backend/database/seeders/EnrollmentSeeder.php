@@ -7,28 +7,65 @@ use Illuminate\Support\Facades\DB;
 
 class EnrollmentSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $enrollments = [
-            ['student_id' => 1, 'class_id' => 1, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-10', 'status' => 'active'],
-            ['student_id' => 2, 'class_id' => 1, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-10', 'status' => 'active'],
-            ['student_id' => 3, 'class_id' => 2, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-11', 'status' => 'active'],
-            ['student_id' => 4, 'class_id' => 2, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-11', 'status' => 'active'],
-            ['student_id' => 5, 'class_id' => 3, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-12', 'status' => 'active'],
-            ['student_id' => 6, 'class_id' => 3, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-12', 'status' => 'active'],
-            ['student_id' => 7, 'class_id' => 4, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-13', 'status' => 'active'],
-            ['student_id' => 8, 'class_id' => 4, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-13', 'status' => 'active'],
-            ['student_id' => 9, 'class_id' => 10, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-14', 'status' => 'completed'],
-            ['student_id' => 10, 'class_id' => 10, 'academic_year' => '2025/2026', 'enrollment_date' => '2026-01-14', 'status' => 'active'],
-        ];
+        $studentIds = DB::table('students')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
 
-        foreach ($enrollments as $enrollment) {
-            $enrollment['created_at'] = now();
-            $enrollment['updated_at'] = now();
-            DB::table('enrollments')->insert($enrollment);
+        $classIds = DB::table('classes')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        if ($studentIds->count() < 100) {
+            throw new \Exception('Need at least 100 students.');
         }
+
+        if ($classIds->count() < 10) {
+            throw new \Exception('Need at least 10 active classes.');
+        }
+
+        $enrollments = [];
+
+        for ($i = 0; $i < 100; $i++) {
+
+            $studentId = $studentIds[$i];
+
+            // Assign students to classes
+            $classId = $classIds[$i % $classIds->count()];
+
+            // Academic year
+            $academicYear = '2026-2027';
+
+            // Enrollment date
+            $enrollmentDate = date(
+                'Y-m-d',
+                strtotime('2026-09-01 +' . ($i % 30) . ' days')
+            );
+
+            // Status
+            if ($i < 90) {
+                $status = 'active';
+            } elseif ($i < 97) {
+                $status = 'completed';
+            } else {
+                $status = 'cancelled';
+            }
+
+            $enrollments[] = [
+                'student_id' => $studentId,
+                'class_id' => $classId,
+                'academic_year' => $academicYear,
+                'enrollment_date' => $enrollmentDate,
+                'status' => $status,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        DB::table('enrollments')->insert($enrollments);
     }
 }

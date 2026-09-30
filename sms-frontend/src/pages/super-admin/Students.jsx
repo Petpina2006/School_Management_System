@@ -19,22 +19,15 @@ const Students = () => {
   // =========================================
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
-
   const [pagination, setPagination] = useState(null);
-
   const [currentPage, setCurrentPage] = useState(1);
-
   const [loading, setLoading] = useState(false);
-
   const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState("");
 
   // Modal
   const [modalOpen, setModalOpen] = useState(false);
-
   const [modalMode, setModalMode] = useState("view");
-
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   // Form
@@ -52,9 +45,7 @@ const Students = () => {
 
   // Filters
   const [search, setSearch] = useState("");
-
   const [genderFilter, setGenderFilter] = useState("all");
-
   const [statusFilter, setStatusFilter] = useState("all");
 
   // =========================================
@@ -65,15 +56,12 @@ const Students = () => {
     try {
       setLoading(true);
       setError("");
-
       const result = await getStudents(page);
-
       if (!result?.status) {
         throw new Error(result?.message || "Failed to fetch students");
       }
 
       setStudents(result.data?.data || []);
-
       setPagination(result.data || null);
     } catch (error) {
       console.error("Fetch Students Error:", error);

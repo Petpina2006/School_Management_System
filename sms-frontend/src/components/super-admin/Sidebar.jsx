@@ -85,7 +85,7 @@ const Sidebar = () => {
           </div>
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight text-white leading-tight">
-              TALUTUN 
+              TALUTUN
             </span>
             <span className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider">
               Super Admin
@@ -151,9 +151,7 @@ const Sidebar = () => {
               <p className="text-xs font-semibold text-white truncate">
                 Admin Panel
               </p>
-              <p className="text-[10px] text-slate-400 truncate">
-                v2.4 System
-              </p>
+              <p className="text-[10px] text-slate-400 truncate">v2.4 System</p>
             </div>
           </div>
 

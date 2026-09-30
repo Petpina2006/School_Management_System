@@ -7,29 +7,74 @@ use Illuminate\Support\Facades\DB;
 
 class ClassSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $classes = [
-            ['class_name' => 'Grade 7A', 'grade' => 'Grade 7', 'section' => 'A', 'room' => 'Room 101', 'academic_year' => '2025/2026', 'teacher_id' => 1],
-            ['class_name' => 'Grade 7B', 'grade' => 'Grade 7', 'section' => 'B', 'room' => 'Room 102', 'academic_year' => '2025/2026', 'teacher_id' => 2],
-            ['class_name' => 'Grade 8A', 'grade' => 'Grade 8', 'section' => 'A', 'room' => 'Room 201', 'academic_year' => '2025/2026', 'teacher_id' => 3],
-            ['class_name' => 'Grade 8B', 'grade' => 'Grade 8', 'section' => 'B', 'room' => 'Room 202', 'academic_year' => '2025/2026', 'teacher_id' => 4],
-            ['class_name' => 'Grade 9A', 'grade' => 'Grade 9', 'section' => 'A', 'room' => 'Room 301', 'academic_year' => '2025/2026', 'teacher_id' => 5],
-            ['class_name' => 'Grade 9B', 'grade' => 'Grade 9', 'section' => 'B', 'room' => 'Room 302', 'academic_year' => '2025/2026', 'teacher_id' => 6],
-            ['class_name' => 'Grade 10A', 'grade' => 'Grade 10', 'section' => 'A', 'room' => 'Room 401', 'academic_year' => '2025/2026', 'teacher_id' => 7],
-            ['class_name' => 'Grade 10B', 'grade' => 'Grade 10', 'section' => 'B', 'room' => 'Room 402', 'academic_year' => '2025/2026', 'teacher_id' => 8],
-            ['class_name' => 'Grade 11A', 'grade' => 'Grade 11', 'section' => 'A', 'room' => 'Room 501', 'academic_year' => '2025/2026', 'teacher_id' => 9],
-            ['class_name' => 'Grade 12A', 'grade' => 'Grade 12', 'section' => 'A', 'room' => 'Room 601', 'academic_year' => '2025/2026', 'teacher_id' => 10],
+        $classes = [];
+
+        $grades = [
+            'Grade 7',
+            'Grade 8',
+            'Grade 9',
+            'Grade 10',
+            'Grade 11',
+            'Grade 12',
         ];
 
-        foreach ($classes as $class) {
-            $class['status'] = 'active';
-            $class['created_at'] = now();
-            $class['updated_at'] = now();
-            DB::table('classes')->insert($class);
+        $sections = [
+            'A',
+            'B',
+            'C',
+            'D',
+        ];
+
+        $rooms = [
+            'Room 101',
+            'Room 102',
+            'Room 103',
+            'Room 104',
+            'Room 201',
+            'Room 202',
+            'Room 203',
+            'Room 204',
+            'Room 301',
+            'Room 302',
+        ];
+
+        for ($i = 1; $i <= 100; $i++) {
+
+            $grade = $grades[($i - 1) % count($grades)];
+
+            $section = $sections[
+                (($i - 1) % count($sections))
+            ];
+
+            $room = $rooms[
+                (($i - 1) % count($rooms))
+            ];
+
+            $classes[] = [
+                'class_name' => $grade . ' - ' . $section,
+
+                'grade' => $grade,
+
+                'section' => $section,
+
+                'room' => $room,
+
+                'academic_year' => '2026-2027',
+
+                // Teacher IDs 1 - 100
+                'teacher_id' => (($i - 1) % 100) + 1,
+
+                'status' => $i > 95
+                    ? 'inactive'
+                    : 'active',
+
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
+
+        DB::table('classes')->insert($classes);
     }
 }
