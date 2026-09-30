@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -148,4 +149,119 @@ class UserController extends Controller
             ], 500);
         }
     }
+    public function superAdminProfile()
+{
+    try {
+
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthenticated',
+                'data' => null
+            ], 401);
+        }
+
+        if ($user->role !== 'super_admin') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized',
+                'data' => null
+            ], 403);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Super Admin profile fetched successfully',
+
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'status' => $user->status,
+            ]
+
+        ], 200);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to fetch Super Admin profile',
+            'error' => $e->getMessage(),
+            'data' => null
+        ], 500);
+    }
+}
+
+
+public function updateSuperAdminProfile(Request $request)
+{
+    try {
+
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthenticated',
+                'data' => null
+            ], 401);
+        }
+
+        if ($user->role !== 'super_admin') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized',
+                'data' => null
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255'
+            ],
+        ]);
+
+        $user->name = $validated['name'];
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Super Admin profile updated successfully',
+
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'status' => $user->status,
+            ]
+
+        ], 200);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Validation failed',
+            'errors' => $e->errors(),
+            'data' => null
+        ], 422);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to update Super Admin profile',
+            'error' => $e->getMessage(),
+            'data' => null
+        ], 500);
+    }
+}
+
 }

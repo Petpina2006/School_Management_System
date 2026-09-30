@@ -132,7 +132,7 @@ class TeacherController extends Controller
             }
             $validated = $request->validate([
                 'user_id' => ['nullable', 'integer', 'exists:users,id'],
-                'teacher_code' => ['required','string','max:255',Rule::unique('teachers', 'teacher_code')->ignore($teacher->id)],
+                'teacher_code' => ['required', 'string', 'max:255', Rule::unique('teachers', 'teacher_code')->ignore($teacher->id)],
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name' => ['required', 'string', 'max:255'],
                 'gender' => ['required', Rule::in(['male', 'female'])],
@@ -160,39 +160,66 @@ class TeacherController extends Controller
         }
     }
 
-    
-// Profile
+
+    // Profile
     public function profile()
-    {
-        try {
+{
+    try {
+        $user = Auth::user();
 
-            $user = Auth::user();
-
-            $teacher = Teacher::with('user')->where('user_id', $user->id)->first();
-            if (!$teacher) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Teacher profile not found',
-                    'data' => null
-                ], 404);
-            }
-            return response()->json([
-                'status' => true,
-                'message' => 'Fetch Teacher Profile Successfully',
-                'data' => $teacher
-            ], 200);
-
-        } catch (\Exception $e) {
-
+        if (!$user) {
             return response()->json([
                 'status' => false,
-                'message' => 'Fetch Teacher Profile Failed',
-                'error' => $e->getMessage(),
+                'message' => 'Unauthenticated',
                 'data' => null
-            ], 500);
+            ], 401);
         }
+
+        $teacher = Teacher::where('user_id', $user->id)->first();
+
+        if (!$teacher) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Teacher profile not found',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Teacher profile fetched successfully',
+            'data' => [
+                'id' => $teacher->id,
+                'teacher_code' => $teacher->teacher_code,
+
+                // First Name
+                'first_name' => $teacher->first_name,
+
+                // Last Name
+                'last_name' => $teacher->last_name,
+
+                'email' => $user->email,
+                'gender' => $teacher->gender,
+                'phone' => $teacher->phone,
+                'address' => $teacher->address,
+                'date_of_birth' => $teacher->date_of_birth,
+                'hire_date' => $teacher->hire_date,
+                'specialization' => $teacher->specialization,
+                'photo' => $teacher->photo,
+                'status' => $teacher->status,
+            ]
+        ], 200);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to fetch teacher profile',
+            'error' => $e->getMessage(),
+        ], 500);
     }
-// my student
+}
+    // my student
     public function myStudents()
     {
         try {
@@ -209,15 +236,14 @@ class TeacherController extends Controller
             $students = Student::whereHas('enrollments.class', function ($query) use ($teacher) {
                 $query->where('teacher_id', $teacher->id);
             })
-            ->with('user')
-            ->distinct()
-            ->get();
+                ->with('user')
+                ->distinct()
+                ->get();
             return response()->json([
                 'status' => true,
                 'message' => 'Fetch My Students Successfully',
                 'data' => $students
             ], 200);
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -228,7 +254,7 @@ class TeacherController extends Controller
             ], 500);
         }
     }
-// myclass
+    // myclass
     public function myClasses()
     {
         try {
@@ -253,7 +279,6 @@ class TeacherController extends Controller
                 'message' => 'Fetch My Classes Successfully',
                 'data' => $classes
             ], 200);
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -264,7 +289,7 @@ class TeacherController extends Controller
             ], 500);
         }
     }
-// mysubject
+    // mysubject
     public function mySubjects()
     {
         try {
@@ -281,21 +306,20 @@ class TeacherController extends Controller
             $subjects = Subject::whereHas('classSubjects', function ($query) use ($teacher) {
                 $query->where('teacher_id', $teacher->id);
             })
-            ->with([
-                'classSubjects' => function ($query) use ($teacher) {
-                    $query->where('teacher_id', $teacher->id)
-                        ->with('class');
-                }
-            ])
-            ->distinct()
-            ->get();
+                ->with([
+                    'classSubjects' => function ($query) use ($teacher) {
+                        $query->where('teacher_id', $teacher->id)
+                            ->with('class');
+                    }
+                ])
+                ->distinct()
+                ->get();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Fetch My Subjects Successfully',
                 'data' => $subjects
             ], 200);
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -306,4 +330,93 @@ class TeacherController extends Controller
             ], 500);
         }
     }
+    public function updateProfile(Request $request)
+{
+    try {
+
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthenticated',
+                'data' => null
+            ], 401);
+        }
+
+        $teacher = Teacher::where('user_id', $user->id)->first();
+
+        if (!$teacher) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Teacher profile not found',
+                'data' => null
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'gender' => ['required', 'in:male,female'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string'],
+        ]);
+
+        // Update Teacher
+        $teacher->first_name = $validated['first_name'];
+        $teacher->last_name = $validated['last_name'];
+        $teacher->gender = $validated['gender'];
+        $teacher->phone = $validated['phone'] ?? null;
+        $teacher->address = $validated['address'] ?? null;
+
+        $teacher->save();
+
+        // Update User name
+        $user->name =
+            $validated['first_name'] . ' ' . $validated['last_name'];
+
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Teacher profile updated successfully',
+            'data' => [
+                'id' => $teacher->id,
+                'teacher_code' => $teacher->teacher_code,
+
+                'first_name' => $teacher->first_name,
+                'last_name' => $teacher->last_name,
+
+                'Full_name' =>
+                    $teacher->first_name . ' ' . $teacher->last_name,
+
+                'email' => $user->email,
+
+                'gender' => $teacher->gender,
+                'phone' => $teacher->phone,
+                'address' => $teacher->address,
+                'status' => $teacher->status,
+            ]
+        ], 200);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Validation failed',
+            'errors' => $e->errors(),
+            'data' => null
+        ], 422);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to update teacher profile',
+            'error' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+        ], 500);
+    }
+}
 }

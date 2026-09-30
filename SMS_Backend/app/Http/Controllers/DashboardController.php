@@ -86,53 +86,246 @@ class DashboardController extends Controller
 
  
     //  | Teacher Dashboard
-    public function teacherDashboard()
-    {
-        try {
-            $user=Auth::user();
-            $teacher = Teacher::where('user_id',$user->id)->first();
-            if (!$teacher) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Teacher profile not found',
-                    'data' => null
-                ], 404);
-            }
-            $classes = Classes::where('teacher_id',$teacher->id)->count();
-            $students = Enrollment::whereHas('class',
-                function ($query) use ($teacher) {
-                    $query->where(
-                        'teacher_id',
-                        $teacher->id
-                    );
-                }
-            )->distinct('student_id')->count('student_id');
+    // Teacher Dashboard
+public function teacherDashboard()
+{
+    try {
 
-            $subjects = ClassSubject::where('teacher_id',$teacher->id)->count();
-            $scores = Score::where('teacher_id',$teacher->id)->count();
-            $attendance = Attendance::where('teacher_id',$teacher->id)->count();
-            $data = [
-                'teacher' => $teacher,
-                'total_classes' => $classes,
-                'total_students' => $students,
-                'total_subjects' => $subjects,
-                'total_scores' => $scores,
-                'total_attendance' => $attendance,
-            ];
-            return response()->json([
-                'status' => true,
-                'message' => 'Fetch Teacher Dashboard Successfully',
-                'data' => $data
-            ], 200);
-        } catch (\Exception $e) {
+        /*
+        |--------------------------------------------------------------------------
+        | Current Teacher
+        |--------------------------------------------------------------------------
+        */
+
+        $user = Auth::user();
+
+        $teacher = Teacher::where(
+            'user_id',
+            $user->id
+        )->first();
+
+        if (!$teacher) {
             return response()->json([
                 'status' => false,
-                'message' => 'Fetch Teacher Dashboard Failed',
-                'error' => $e->getMessage(),
+                'message' => 'Teacher profile not found',
                 'data' => null
-            ], 500);
+            ], 404);
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Classes Assigned To Teacher
+        |--------------------------------------------------------------------------
+        */
+
+        $classes = Classes::where(
+            'teacher_id',
+            $teacher->id
+        )->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Total Classes
+        |--------------------------------------------------------------------------
+        */
+
+        $totalClasses = $classes->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Students By Class
+        |--------------------------------------------------------------------------
+        |
+        | We use Enrollment because your Classes model
+        | does not have students() relationship.
+        |
+        */
+
+        $classData = $classes->map(function ($class) {
+
+            $studentCount = Enrollment::where(
+                'class_id',
+                $class->id
+            )
+            ->where('status', 'active')
+            ->count();
+
+            return [
+                'className' => $class->class_name,
+                'students' => $studentCount,
+            ];
+
+        })->values();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Total Students
+        |--------------------------------------------------------------------------
+        */
+
+        $totalStudents = $classData->sum('students');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Total Subjects
+        |--------------------------------------------------------------------------
+        */
+
+        $totalSubjects = ClassSubject::whereIn(
+            'class_id',
+            $classes->pluck('id')
+        )->distinct('subject_id')->count('subject_id');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Attendance
+        |--------------------------------------------------------------------------
+        |
+        | Get attendance records for students enrolled
+        | in the teacher's classes.
+        |
+        */
+
+        $classIds = $classes->pluck('id');
+
+
+        $studentIds = Enrollment::whereIn(
+            'class_id',
+            $classIds
+        )
+        ->where('status', 'active')
+        ->pluck('student_id');
+
+
+        $attendance = Attendance::whereIn(
+            'student_id',
+            $studentIds
+        )
+        ->selectRaw('status, COUNT(*) as total')
+        ->groupBy('status')
+        ->pluck('total', 'status');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Attendance Pie Chart
+        |--------------------------------------------------------------------------
+        */
+
+        $attendanceData = [
+            [
+                'name' => 'Present',
+                'value' => (int) ($attendance['present'] ?? 0),
+            ],
+
+            [
+                'name' => 'Absent',
+                'value' => (int) ($attendance['absent'] ?? 0),
+            ],
+
+            [
+                'name' => 'Late',
+                'value' => (int) ($attendance['late'] ?? 0),
+            ],
+
+            [
+                'name' => 'Excused',
+                'value' => (int) ($attendance['excused'] ?? 0),
+            ],
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Total Attendance
+        |--------------------------------------------------------------------------
+        */
+
+        $totalAttendance = $attendanceData[0]['value']
+            + $attendanceData[1]['value']
+            + $attendanceData[2]['value']
+            + $attendanceData[3]['value'];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Total Scores
+        |--------------------------------------------------------------------------
+        */
+
+        $totalScores = Score::whereIn(
+            'student_id',
+            $studentIds
+        )->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Final Dashboard Response
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+
+            'status' => true,
+
+            'message' => 'Fetch Teacher Dashboard Successfully',
+
+            'data' => [
+
+                /*
+                | Summary
+                */
+
+                'total_classes' => $totalClasses,
+
+                'total_students' => $totalStudents,
+
+                'total_subjects' => $totalSubjects,
+
+                'total_scores' => $totalScores,
+
+                'total_attendance' => $totalAttendance,
+
+
+                /*
+                | Bar Chart
+                */
+
+                'class_data' => $classData,
+
+
+                /*
+                | Pie Chart
+                */
+
+                'attendance_data' => $attendanceData,
+
+            ]
+
+        ], 200);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+
+            'status' => false,
+
+            'message' => 'Fetch Teacher Dashboard Failed',
+
+            'error' => $e->getMessage(),
+
+            'data' => null
+
+        ], 500);
     }
+}
 
 // // Student Dashboard
 //     public function studentDashboard()
