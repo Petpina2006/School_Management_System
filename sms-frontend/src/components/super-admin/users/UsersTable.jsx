@@ -1,5 +1,6 @@
 import {
   Users,
+  Eye,
   Edit,
   Trash2,
   RefreshCw,
@@ -11,11 +12,17 @@ import {
   XCircle,
 } from "lucide-react";
 
-const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
+const UsersTable = ({
+  users = [],
+  loading = false,
+  onView,
+  onEdit,
+  onDelete,
+  deletingId = null,
+}) => {
   // =========================================
   // ROLE ICON
   // =========================================
-
   const getRoleIcon = (role) => {
     switch (role) {
       case "super_admin":
@@ -38,7 +45,6 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
   // =========================================
   // ROLE STYLE
   // =========================================
-
   const getRoleStyle = (role) => {
     switch (role) {
       case "super_admin":
@@ -61,9 +67,10 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
   // =========================================
   // ROLE NAME
   // =========================================
-
   const getRoleName = (role) => {
-    if (!role) return "Unknown";
+    if (!role) {
+      return "Unknown";
+    }
 
     return role
       .replaceAll("_", " ")
@@ -73,7 +80,6 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
   // =========================================
   // STATUS STYLE
   // =========================================
-
   const getStatusStyle = (status) => {
     return status === "active"
       ? "bg-emerald-100 text-emerald-700"
@@ -81,9 +87,21 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
   };
 
   // =========================================
+  // LOADING
+  // =========================================
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-gray-100 bg-white p-12 text-center shadow-sm">
+        <RefreshCw size={28} className="mx-auto animate-spin text-blue-500" />
+
+        <p className="mt-3 text-sm text-gray-500">Loading users...</p>
+      </div>
+    );
+  }
+
+  // =========================================
   // EMPTY
   // =========================================
-
   if (users.length === 0) {
     return (
       <div className="rounded-xl border border-gray-100 bg-white p-12 text-center shadow-sm">
@@ -92,7 +110,7 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
         <h3 className="mt-4 font-semibold text-gray-600">No users found</h3>
 
         <p className="mt-1 text-sm text-gray-400">
-          Try changing your search or filters
+          Try changing your search or filters.
         </p>
       </div>
     );
@@ -101,11 +119,10 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[950px]">
-          {/* =====================================
-                        HEADER
-                    ===================================== */}
-
+        <table className="w-full min-w-[1000px]">
+          {/* =========================================
+              HEADER
+          ========================================= */}
           <thead className="border-b border-gray-100 bg-gray-50">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -134,10 +151,9 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
             </tr>
           </thead>
 
-          {/* =====================================
-                        BODY
-                    ===================================== */}
-
+          {/* =========================================
+              BODY
+          ========================================= */}
           <tbody className="divide-y divide-gray-100">
             {users.map((user, index) => {
               const RoleIcon = getRoleIcon(user.role);
@@ -145,13 +161,11 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
               return (
                 <tr key={user.id} className="transition hover:bg-gray-50">
                   {/* Number */}
-
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {index + 1}
                   </td>
 
                   {/* User */}
-
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600">
@@ -169,13 +183,11 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
                   </td>
 
                   {/* Email */}
-
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {user.email}
+                    {user.email || "No Email"}
                   </td>
 
                   {/* Role */}
-
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${getRoleStyle(
@@ -189,7 +201,6 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
                   </td>
 
                   {/* Status */}
-
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${getStatusStyle(
@@ -210,25 +221,41 @@ const UsersTable = ({ users = [], onEdit, onDelete, deletingId }) => {
                   </td>
 
                   {/* Actions */}
-
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">
-                      {/* Edit */}
-
+                      {/* VIEW */}
                       <button
                         type="button"
-                        onClick={() => onEdit(user)}
+                        onClick={() => {
+                          console.log("VIEW USER:", user);
+                          onView?.(user);
+                        }}
+                        className="rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 hover:text-gray-800"
+                        title="View User"
+                      >
+                        <Eye size={17} />
+                      </button>
+
+                      {/* EDIT */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          console.log("EDIT USER:", user);
+                          onEdit?.(user);
+                        }}
                         className="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50"
                         title="Edit User"
                       >
                         <Edit size={17} />
                       </button>
 
-                      {/* Delete */}
-
+                      {/* DELETE */}
                       <button
                         type="button"
-                        onClick={() => onDelete(user.id)}
+                        onClick={() => {
+                          console.log("DELETE USER:", user);
+                          onDelete?.(user);
+                        }}
                         disabled={deletingId === user.id}
                         className="rounded-lg p-2 text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                         title="Delete User"

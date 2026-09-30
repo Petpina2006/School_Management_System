@@ -1,8 +1,5 @@
 import { apiFetch } from "./api";
-
-// =========================================
 // GET ALL USERS
-// =========================================
 export const getUsers = async (page = 1) => {
     return await apiFetch(
         `/super-admin/users?page=${page}`,
@@ -12,9 +9,7 @@ export const getUsers = async (page = 1) => {
     );
 };
 
-// =========================================
 // GET SINGLE USER
-// =========================================
 export const getUser = async (id) => {
     return await apiFetch(
         `/super-admin/users/${id}`,
@@ -24,9 +19,7 @@ export const getUser = async (id) => {
     );
 };
 
-// =========================================
 // CREATE USER
-// =========================================
 export const createUser = async (data) => {
     return await apiFetch(
         "/super-admin/users",
@@ -37,9 +30,7 @@ export const createUser = async (data) => {
     );
 };
 
-// =========================================
 // UPDATE USER
-// =========================================
 export const updateUser = async (id, data) => {
     return await apiFetch(
         `/super-admin/users/${id}`,
@@ -50,9 +41,7 @@ export const updateUser = async (id, data) => {
     );
 };
 
-// =========================================
 // DELETE USER
-// =========================================
 export const deleteUser = async (id) => {
     return await apiFetch(
         `/super-admin/users/${id}`,

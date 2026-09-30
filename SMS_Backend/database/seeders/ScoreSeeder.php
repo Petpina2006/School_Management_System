@@ -7,28 +7,116 @@ use Illuminate\Support\Facades\DB;
 
 class ScoreSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $scores = [
-            ['student_id' => 1, 'subject_id' => 1, 'class_id' => 1, 'teacher_id' => 1, 'exam_type' => 'midterm', 'score' => 85.50, 'max_score' => 100, 'exam_date' => '2026-04-10', 'remark' => 'Good'],
-            ['student_id' => 1, 'subject_id' => 2, 'class_id' => 1, 'teacher_id' => 1, 'exam_type' => 'final', 'score' => 90.00, 'max_score' => 100, 'exam_date' => '2026-06-15', 'remark' => 'Excellent'],
-            ['student_id' => 2, 'subject_id' => 1, 'class_id' => 1, 'teacher_id' => 1, 'exam_type' => 'midterm', 'score' => 78.00, 'max_score' => 100, 'exam_date' => '2026-04-10', 'remark' => 'Fair'],
-            ['student_id' => 2, 'subject_id' => 2, 'class_id' => 1, 'teacher_id' => 2, 'exam_type' => 'quiz', 'score' => 92.50, 'max_score' => 100, 'exam_date' => '2026-03-02', 'remark' => 'Excellent'],
-            ['student_id' => 3, 'subject_id' => 1, 'class_id' => 2, 'teacher_id' => 1, 'exam_type' => 'assignment', 'score' => 88.00, 'max_score' => 100, 'exam_date' => '2026-02-20', 'remark' => 'Good'],
-            ['student_id' => 4, 'subject_id' => 2, 'class_id' => 2, 'teacher_id' => 2, 'exam_type' => 'midterm', 'score' => 75.50, 'max_score' => 100, 'exam_date' => '2026-04-12', 'remark' => 'Fair'],
-            ['student_id' => 5, 'subject_id' => 3, 'class_id' => 3, 'teacher_id' => 3, 'exam_type' => 'final', 'score' => 95.00, 'max_score' => 100, 'exam_date' => '2026-06-16', 'remark' => 'Excellent'],
-            ['student_id' => 6, 'subject_id' => 3, 'class_id' => 3, 'teacher_id' => 3, 'exam_type' => 'midterm', 'score' => 80.00, 'max_score' => 100, 'exam_date' => '2026-04-14', 'remark' => 'Good'],
-            ['student_id' => 7, 'subject_id' => 4, 'class_id' => 4, 'teacher_id' => 4, 'exam_type' => 'quiz', 'score' => 82.50, 'max_score' => 100, 'exam_date' => '2026-03-05', 'remark' => 'Good'],
-            ['student_id' => 8, 'subject_id' => 4, 'class_id' => 4, 'teacher_id' => 4, 'exam_type' => 'assignment', 'score' => 70.00, 'max_score' => 100, 'exam_date' => '2026-02-25', 'remark' => 'Fair'],
+        $studentIds = DB::table('students')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        $subjectIds = DB::table('subjects')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        $classIds = DB::table('classes')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        $teacherIds = DB::table('teachers')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        if ($studentIds->count() < 100) {
+            throw new \Exception('Need at least 100 students.');
+        }
+
+        if ($subjectIds->count() < 10) {
+            throw new \Exception('Need at least 10 active subjects.');
+        }
+
+        if ($classIds->count() < 10) {
+            throw new \Exception('Need at least 10 active classes.');
+        }
+
+        if ($teacherIds->count() < 10) {
+            throw new \Exception('Need at least 10 active teachers.');
+        }
+
+        $examTypes = [
+            'quiz',
+            'assignment',
+            'midterm',
+            'final'
         ];
 
-        foreach ($scores as $score) {
-            $score['created_at'] = now();
-            $score['updated_at'] = now();
-            DB::table('scores')->insert($score);
+        $remarks = [
+            'Excellent performance',
+            'Very good',
+            'Good performance',
+            'Needs improvement',
+            'Satisfactory',
+            null,
+            null,
+            null,
+        ];
+
+        $scores = [];
+
+        for ($i = 0; $i < 100; $i++) {
+
+            $studentId = $studentIds[$i];
+
+            $subjectId = $subjectIds[$i % $subjectIds->count()];
+
+            $classId = $classIds[$i % $classIds->count()];
+
+            $teacherId = $teacherIds[($i * 2) % $teacherIds->count()];
+
+            $examType = $examTypes[$i % count($examTypes)];
+
+            // Generate realistic score between 55 and 98
+            $score = 55 + (($i * 7) % 44);
+
+            $maxScore = 100;
+
+            $examDate = date(
+                'Y-m-d',
+                strtotime('2026-09-01 +' . ($i % 30) . ' days')
+            );
+
+            if ($score >= 90) {
+                $remark = 'Excellent performance';
+            } elseif ($score >= 80) {
+                $remark = 'Very good';
+            } elseif ($score >= 70) {
+                $remark = 'Good performance';
+            } elseif ($score >= 60) {
+                $remark = 'Satisfactory';
+            } else {
+                $remark = 'Needs improvement';
+            }
+
+            $scores[] = [
+                'student_id' => $studentId,
+                'subject_id' => $subjectId,
+                'class_id' => $classId,
+                'teacher_id' => $teacherId,
+                'exam_type' => $examType,
+                'score' => $score,
+                'max_score' => $maxScore,
+                'exam_date' => $examDate,
+                'remark' => $remark,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
+
+        DB::table('scores')->insert($scores);
     }
 }

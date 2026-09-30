@@ -1,210 +1,162 @@
-import { useEffect, useState } from "react";
-
-import { X, XCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-// ============================================
-// API
-// ============================================
+
+import UsersHeader from "../../components/super-admin/users/UsersHeader";
+import UsersStats from "../../components/super-admin/users/UsersStats";
+import UsersFilter from "../../components/super-admin/users/UsersFilters";
+import UsersTable from "../../components/super-admin/users/UsersTable";
+import UsersPagination from "../../components/super-admin/users/UsersPagination";
+import UserModal from "../../components/super-admin/users/UserModal";
 
 import {
   getUsers,
-  createUser,
+  getUser,
   updateUser,
   deleteUser,
 } from "../../services/userApi";
 
-// ============================================
-// COMPONENTS
-// ============================================
-
-import UsersHeader from "../../components/super-admin/users/UsersHeader";
-
-import UsersStats from "../../components/super-admin/users/UsersStats";
-
-import UsersFilters from "../../components/super-admin/users/UsersFilters";
-
-import UsersTable from "../../components/super-admin/users/UsersTable";
-
-import UsersPagination from "../../components/super-admin/users/UsersPagination";
-
-import UserModal from "../../components/super-admin/users/UserModal";
-
 const Users = () => {
-  // =====================================================
-  // USERS STATE
-  // =====================================================
   const navigate = useNavigate();
+
+  // =========================================
+  // USERS
+  // =========================================
   const [users, setUsers] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  // =====================================================
-  // FILTER STATE
-  // =====================================================
+  const [deletingId, setDeletingId] = useState(null);
 
+  // =========================================
+  // PAGINATION
+  // =========================================
+  const [pagination, setPagination] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // =========================================
+  // FILTER
+  // =========================================
   const [search, setSearch] = useState("");
 
   const [roleFilter, setRoleFilter] = useState("all");
 
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // =====================================================
-  // MODAL STATE
-  // =====================================================
+  // =========================================
+  // MODAL
+  // =========================================
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState("view");
 
-  const [editingUser, setEditingUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const [saving, setSaving] = useState(false);
-
-  // =====================================================
-  // DELETE STATE
-  // =====================================================
-
-  const [deletingId, setDeletingId] = useState(null);
-
-  // =====================================================
-  // PAGINATION STATE
-  // =====================================================
-
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const [pagination, setPagination] = useState(null);
-
-  // =====================================================
-  // FORM STATE
-  // =====================================================
-
+  // =========================================
+  // FORM
+  // =========================================
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    role: "student",
-    status: "active",
+    role: "",
+    status: "",
   });
 
-  // =====================================================
-  // GET USERS
-  // =====================================================
-
+  // =========================================
+  // FETCH USERS
+  // =========================================
   const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
 
-      setError("");
-
       const result = await getUsers(page);
 
-      console.log("Users:", result);
+      console.log("USERS API:", result);
 
-      // ---------------------------------------------
-      // CHECK STATUS
-      // ---------------------------------------------
+      setUsers(result.data?.data || []);
 
-      if (!result?.status) {
-        throw new Error(result?.message || "Failed to fetch users");
-      }
+      setPagination(result.data || null);
 
-      // ---------------------------------------------
-      // RESPONSE DATA
-      // ---------------------------------------------
-
-      const responseData = result.data;
-
-      // ---------------------------------------------
-      // ARRAY RESPONSE
-      // ---------------------------------------------
-
-      if (Array.isArray(responseData)) {
-        setUsers(responseData);
-
-        setPagination(null);
-      }
-
-      // ---------------------------------------------
-      // PAGINATION RESPONSE
-      // ---------------------------------------------
-      else {
-        setUsers(responseData?.data || []);
-
-        setPagination(responseData);
-      }
-    } catch (err) {
-      console.error("Fetch Users Error:", err);
-
-      setError(err?.message || "Failed to load users");
+      setCurrentPage(result.data?.current_page || page);
+    } catch (error) {
+      console.error("Fetch users error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // =====================================================
+  // =========================================
   // INITIAL LOAD
-  // =====================================================
-
+  // =========================================
   useEffect(() => {
-    fetchUsers(currentPage);
-  }, [currentPage]);
+    fetchUsers(1);
+  }, []);
 
-  // =====================================================
-  // ADD USER
-  // =====================================================
+  // =========================================
+  // VIEW USER
+  // =========================================
+  const handleView = async (user) => {
+    try {
+      setSelectedUser(user);
 
-  const handleAdd = () => {
-    setEditingUser(null);
+      setModalMode("view");
 
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      role: "student",
-      status: "active",
-    });
+      setModalOpen(true);
 
-    setError("");
+      // Optional: get latest user information
+      const result = await getUser(user.id);
 
-    setShowModal(true);
+      if (result?.data) {
+        setSelectedUser(result.data);
+      }
+    } catch (error) {
+      console.error("View user error:", error);
+
+      // Keep original user if GET detail fails
+      setSelectedUser(user);
+    }
   };
 
-  // =====================================================
+  // =========================================
   // EDIT USER
-  // =====================================================
-
+  // =========================================
   const handleEdit = (user) => {
-    setEditingUser(user);
+    console.log("OPEN EDIT:", user);
+
+    setSelectedUser(user);
 
     setFormData({
       name: user.name || "",
       email: user.email || "",
       password: "",
-      role: user.role || "student",
-      status: user.status || "active",
+      role: user.role || "",
+      status: user.status || "",
     });
 
-    setError("");
+    setModalMode("edit");
 
-    setShowModal(true);
+    setModalOpen(true);
   };
 
-  // =====================================================
-  // CLOSE MODAL
-  // =====================================================
+  // =========================================
+  // OPEN DELETE
+  // =========================================
+  const handleDelete = (user) => {
+    console.log("OPEN DELETE:", user);
 
-  const handleCloseModal = () => {
-    if (saving) return;
+    setSelectedUser(user);
 
-    setShowModal(false);
+    setModalMode("delete");
 
-    setEditingUser(null);
+    setModalOpen(true);
   };
 
-  // =====================================================
-  // FORM CHANGE
-  // =====================================================
-
+  // =========================================
+  // CHANGE FORM
+  // =========================================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -214,193 +166,168 @@ const Users = () => {
     }));
   };
 
-  // =====================================================
-  // CREATE / UPDATE
-  // =====================================================
-
-  const handleSubmit = async (e) => {
+  // =========================================
+  // UPDATE USER
+  // =========================================
+  const handleUpdate = async (e) => {
     e.preventDefault();
+
+    if (!selectedUser?.id) {
+      return;
+    }
 
     try {
       setSaving(true);
 
-      setError("");
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+        status: formData.status,
+      };
 
-      // =================================================
-      // CREATE USER
-      // =================================================
-
-      if (!editingUser) {
-        const result = await createUser(formData);
-
-        if (!result?.status) {
-          throw new Error(result?.message || "Failed to create user");
-        }
+      // Only send password if user entered one
+      if (formData.password?.trim()) {
+        payload.password = formData.password;
       }
 
-      // =================================================
-      // UPDATE USER
-      // =================================================
-      else {
-        const updateData = {
-          name: formData.name,
-          email: formData.email,
-          role: formData.role,
-          status: formData.status,
-        };
+      console.log("UPDATE PAYLOAD:", payload);
 
-        // ---------------------------------------------
-        // PASSWORD
-        // ---------------------------------------------
+      await updateUser(selectedUser.id, payload);
 
-        if (formData.password.trim()) {
-          updateData.password = formData.password;
-        }
+      // Close modal
+      setModalOpen(false);
 
-        const result = await updateUser(editingUser.id, updateData);
+      setSelectedUser(null);
 
-        if (!result?.status) {
-          throw new Error(result?.message || "Failed to update user");
-        }
-      }
-
-      // =================================================
-      // SUCCESS
-      // =================================================
-
-      setShowModal(false);
-
-      setEditingUser(null);
-
-      // =================================================
-      // REFRESH
-      // =================================================
-
+      // Refresh current page
       await fetchUsers(currentPage);
-    } catch (err) {
-      console.error("Save User Error:", err);
+    } catch (error) {
+      console.error("Update user error:", error);
 
-      setError(err?.message || "Failed to save user");
+      alert(error?.message || "Failed to update user.");
     } finally {
       setSaving(false);
     }
   };
 
-  // =====================================================
-  // DELETE USER
-  // =====================================================
-
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this user?",
-    );
-
-    if (!confirmed) {
+  // =========================================
+  // CONFIRM DELETE
+  // =========================================
+  const handleConfirmDelete = async () => {
+    if (!selectedUser?.id) {
       return;
     }
 
     try {
-      setDeletingId(id);
+      setSaving(true);
 
-      setError("");
+      setDeletingId(selectedUser.id);
 
-      const result = await deleteUser(id);
+      console.log("DELETE USER ID:", selectedUser.id);
 
-      if (!result?.status) {
-        throw new Error(result?.message || "Failed to delete user");
-      }
+      await deleteUser(selectedUser.id);
 
+      // Close modal
+      setModalOpen(false);
+
+      setSelectedUser(null);
+
+      // Refresh
       await fetchUsers(currentPage);
-    } catch (err) {
-      console.error("Delete User Error:", err);
+    } catch (error) {
+      console.error("Delete user error:", error);
 
-      setError(err?.message || "Failed to delete user");
+      alert(error?.message || "Failed to delete user.");
     } finally {
+      setSaving(false);
+
       setDeletingId(null);
     }
   };
 
-  // =====================================================
+  // =========================================
+  // CLOSE MODAL
+  // =========================================
+  const handleCloseModal = () => {
+    if (saving) {
+      return;
+    }
+
+    setModalOpen(false);
+
+    setSelectedUser(null);
+
+    setModalMode("view");
+
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      role: "",
+      status: "",
+    });
+  };
+
+  // =========================================
   // FILTER
-  // =====================================================
+  // =========================================
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const searchText = search.toLowerCase();
 
-  const filteredUsers = users.filter((user) => {
-    const searchValue = search.trim().toLowerCase();
+      const matchesSearch =
+        user.name?.toLowerCase().includes(searchText) ||
+        user.email?.toLowerCase().includes(searchText);
 
-    // ---------------------------------------------
-    // SEARCH
-    // ---------------------------------------------
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
 
-    const matchesSearch =
-      !searchValue ||
-      user.name?.toLowerCase().includes(searchValue) ||
-      user.email?.toLowerCase().includes(searchValue);
+      const matchesStatus =
+        statusFilter === "all" || user.status === statusFilter;
 
-    // ---------------------------------------------
-    // ROLE
-    // ---------------------------------------------
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }, [users, search, roleFilter, statusFilter]);
 
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
+  // =========================================
+  // PREVIOUS
+  // =========================================
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      fetchUsers(currentPage - 1);
+    }
+  };
 
-    // ---------------------------------------------
-    // STATUS
-    // ---------------------------------------------
+  // =========================================
+  // NEXT
+  // =========================================
+  const handleNext = () => {
+    if (pagination && currentPage < pagination.last_page) {
+      fetchUsers(currentPage + 1);
+    }
+  };
 
-    const matchesStatus =
-      statusFilter === "all" || user.status === statusFilter;
-
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  // =====================================================
-  // UI
-  // =====================================================
+  // =========================================
+  // ADD USER
+  // =========================================
+  const handleAdd = () => {
+    navigate("/super-admin/users/create");
+  };
 
   return (
     <div className="space-y-6">
-      {/* =================================================
-                HEADER
-            ================================================= */}
-
+      {/* HEADER */}
       <UsersHeader
-        onRefresh={() => fetchUsers(currentPage)}
-        onAdd={() => navigate("/super-admin/users/create")}
         loading={loading}
+        onRefresh={() => fetchUsers(currentPage)}
+        onAdd={handleAdd}
       />
 
-      {/* =================================================
-                ERROR
-            ================================================= */}
-
-      {error && (
-        <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4">
-          <div className="flex items-center gap-3">
-            <XCircle size={20} className="text-red-600" />
-
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setError("")}
-            className="rounded-lg p-1 text-red-500 transition hover:bg-red-100 hover:text-red-700"
-          >
-            <X size={18} />
-          </button>
-        </div>
-      )}
-
-      {/* =================================================
-                STATS
-            ================================================= */}
-
+      {/* STATS */}
       <UsersStats users={users} />
 
-      {/* =================================================
-                FILTERS
-            ================================================= */}
-
-      <UsersFilters
+      {/* FILTER */}
+      <UsersFilter
         search={search}
         setSearch={setSearch}
         roleFilter={roleFilter}
@@ -409,49 +336,45 @@ const Users = () => {
         setStatusFilter={setStatusFilter}
       />
 
-      {/* =================================================
-                TABLE
-            ================================================= */}
-
-      {loading ? (
-        <div className="rounded-xl border border-gray-100 bg-white p-12 text-center shadow-sm">
-          <p className="text-sm text-gray-500">Loading users...</p>
-        </div>
-      ) : (
-        <UsersTable
-          users={filteredUsers}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          deletingId={deletingId}
-        />
-      )}
-
-      {/* =================================================
-                PAGINATION
-            ================================================= */}
-
-      <UsersPagination
-        pagination={pagination}
-        onPrevious={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-        onNext={() =>
-          setCurrentPage((prev) =>
-            Math.min(pagination?.last_page || prev, prev + 1),
-          )
-        }
+      {/* TABLE */}
+      <UsersTable
+        users={filteredUsers}
+        loading={loading}
+        deletingId={deletingId}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
 
-      {/* =================================================
-                MODAL
-            ================================================= */}
+      {/* PAGINATION */}
+      <UsersPagination
+        pagination={pagination}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
 
+      {/* MODAL */}
       <UserModal
-        open={showModal}
-        editingUser={editingUser}
+        open={modalOpen}
+        user={selectedUser}
+        mode={modalMode}
         formData={formData}
         saving={saving}
         onClose={handleCloseModal}
         onChange={handleChange}
-        onSubmit={handleSubmit}
+        onSubmit={handleUpdate}
+        onEdit={() => {
+          if (selectedUser) {
+            handleEdit(selectedUser);
+          }
+        }}
+        onDelete={() => {
+          if (modalMode === "view") {
+            handleDelete(selectedUser);
+          } else if (modalMode === "delete") {
+            handleConfirmDelete();
+          }
+        }}
       />
     </div>
   );

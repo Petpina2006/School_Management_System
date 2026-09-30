@@ -10,7 +10,7 @@ class ClassController extends Controller
 {
     public function index()
     {
-        $class = Classes::oldest()->paginate(10);
+        $class = Classes::with('teacher')->oldest('id')->paginate(10);
         return response()->json([
             'message' => "Fetch Data Successfully!",
             'status' => true,

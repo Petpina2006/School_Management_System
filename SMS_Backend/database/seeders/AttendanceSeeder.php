@@ -7,28 +7,87 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $rows = [
-            ['student_id' => 1, 'class_id' => 1, 'teacher_id' => 1, 'attendance_date' => '2026-09-01', 'status' => 'present', 'remark' => null],
-            ['student_id' => 2, 'class_id' => 1, 'teacher_id' => 1, 'attendance_date' => '2026-09-01', 'status' => 'absent', 'remark' => 'Sick'],
-            ['student_id' => 3, 'class_id' => 2, 'teacher_id' => 2, 'attendance_date' => '2026-09-01', 'status' => 'late', 'remark' => null],
-            ['student_id' => 4, 'class_id' => 2, 'teacher_id' => 2, 'attendance_date' => '2026-09-01', 'status' => 'present', 'remark' => null],
-            ['student_id' => 5, 'class_id' => 3, 'teacher_id' => 3, 'attendance_date' => '2026-09-02', 'status' => 'present', 'remark' => null],
-            ['student_id' => 6, 'class_id' => 3, 'teacher_id' => 3, 'attendance_date' => '2026-09-02', 'status' => 'absent', 'remark' => 'Family event'],
-            ['student_id' => 7, 'class_id' => 4, 'teacher_id' => 4, 'attendance_date' => '2026-09-02', 'status' => 'present', 'remark' => null],
-            ['student_id' => 8, 'class_id' => 4, 'teacher_id' => 4, 'attendance_date' => '2026-09-02', 'status' => 'late', 'remark' => null],
-            ['student_id' => 9, 'class_id' => 5, 'teacher_id' => 5, 'attendance_date' => '2026-09-03', 'status' => 'present', 'remark' => null],
-            ['student_id' => 10, 'class_id' => 5, 'teacher_id' => 5, 'attendance_date' => '2026-09-03', 'status' => 'present', 'remark' => null],
+        $studentIds = DB::table('students')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        $classIds = DB::table('classes')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        $teacherIds = DB::table('teachers')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        if ($studentIds->count() < 100) {
+            throw new \Exception('Need at least 100 students.');
+        }
+
+        if ($classIds->count() < 10) {
+            throw new \Exception('Need at least 10 active classes.');
+        }
+
+        if ($teacherIds->count() < 10) {
+            throw new \Exception('Need at least 10 active teachers.');
+        }
+
+        $statuses = [
+            'present',
+            'present',
+            'present',
+            'present',
+            'late',
+            'absent',
+            'excused',
         ];
 
-        foreach ($rows as $row) {
-            $row['created_at'] = now();
-            $row['updated_at'] = now();
-            DB::table('attendance')->insert($row);
+        $attendance = [];
+
+        for ($i = 0; $i < 100; $i++) {
+
+            $studentId = $studentIds[$i];
+
+            $classId = $classIds[$i % $classIds->count()];
+
+            $teacherId = $teacherIds[($i * 2) % $teacherIds->count()];
+
+            // Each student gets a different date
+            $attendanceDate = date(
+                'Y-m-d',
+                strtotime('2026-09-01 +' . $i . ' days')
+            );
+
+            $status = $statuses[$i % count($statuses)];
+
+            $remark = null;
+
+            if ($status === 'late') {
+                $remark = 'Arrived late';
+            } elseif ($status === 'absent') {
+                $remark = 'Absent from class';
+            } elseif ($status === 'excused') {
+                $remark = 'Excused absence';
+            }
+
+            $attendance[] = [
+                'student_id' => $studentId,
+                'class_id' => $classId,
+                'teacher_id' => $teacherId,
+                'attendance_date' => $attendanceDate,
+                'status' => $status,
+                'remark' => $remark,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
+
+        DB::table('attendance')->insert($attendance);
     }
 }

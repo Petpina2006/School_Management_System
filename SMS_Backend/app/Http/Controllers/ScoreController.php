@@ -10,8 +10,14 @@ class ScoreController extends Controller
 {
     public function index()
     {
-        $score = Score::oldest()->paginate(10);
         try {
+            $score = Score::with([
+                'student',
+                'subject',
+                'class',
+                'teacher'
+            ])->oldest('id')->paginate(10);
+
             return response()->json([
                 'message' => 'Fetch All Data Score Successfully',
                 'status' => true,
@@ -19,7 +25,7 @@ class ScoreController extends Controller
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => "Fetch Data Score Fails",
+                'message' => 'Fetch Data Score Fails',
                 'status' => false,
                 'error' => $e->getMessage(),
                 'data' => null
@@ -123,7 +129,7 @@ class ScoreController extends Controller
                 'subject_id' => ['required', 'integer', 'exists:subjects,id'],
                 'class_id' => ['required', 'integer', 'exists:classes,id'],
                 'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
-                'exam_type' => ['required', Rule::in(['quiz','assignment','midterm','final',])],
+                'exam_type' => ['required', Rule::in(['quiz', 'assignment', 'midterm', 'final',])],
                 'score' => ['required', 'numeric', 'min:0', 'max:999.99'],
                 'max_score' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
                 'exam_date' => ['required', 'date'],

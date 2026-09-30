@@ -10,7 +10,7 @@ class SubjectController extends Controller
 {
     public function index()
     {
-        $subject = Subject::oldest()->paginate(10);
+        $subject = Subject::oldest('id')->paginate(10);
         try {
             return response()->json([
                 'message' => 'Fetch All Data Subject Successfully',

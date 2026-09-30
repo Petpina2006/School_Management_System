@@ -7,28 +7,60 @@ use Illuminate\Support\Facades\DB;
 
 class ClassSubjectSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $rows = [
-            ['class_id' => 1, 'subject_id' => 1, 'teacher_id' => 1],
-            ['class_id' => 1, 'subject_id' => 2, 'teacher_id' => 1],
-            ['class_id' => 2, 'subject_id' => 1, 'teacher_id' => 2],
-            ['class_id' => 3, 'subject_id' => 3, 'teacher_id' => 3],
-            ['class_id' => 4, 'subject_id' => 4, 'teacher_id' => 4],
-            ['class_id' => 5, 'subject_id' => 5, 'teacher_id' => 5],
-            ['class_id' => 6, 'subject_id' => 6, 'teacher_id' => 6],
-            ['class_id' => 7, 'subject_id' => 7, 'teacher_id' => 7],
-            ['class_id' => 8, 'subject_id' => 8, 'teacher_id' => 8],
-            ['class_id' => 9, 'subject_id' => 9, 'teacher_id' => 9],
-        ];
+        $classIds = DB::table('classes')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
 
-        foreach ($rows as $row) {
-            $row['created_at'] = now();
-            $row['updated_at'] = now();
-            DB::table('class_subjects')->insert($row);
+        $subjectIds = DB::table('subjects')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        $teacherIds = DB::table('teachers')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        if ($classIds->count() < 100) {
+            throw new \Exception('Need at least 100 classes.');
         }
+
+        if ($subjectIds->count() < 20) {
+            throw new \Exception('Need at least 20 active subjects.');
+        }
+
+        if ($teacherIds->count() < 20) {
+            throw new \Exception('Need at least 20 active teachers.');
+        }
+
+        $classSubjects = [];
+
+        for ($i = 0; $i < 100; $i++) {
+
+            $classId = $classIds[$i];
+
+            // Each class gets different subjects
+            $subjectIndex = $i % $subjectIds->count();
+            $subjectId = $subjectIds[$subjectIndex];
+
+            // Assign teacher
+            $teacherIndex = ($i * 3) % $teacherIds->count();
+            $teacherId = $teacherIds[$teacherIndex];
+
+            $classSubjects[] = [
+                'class_id' => $classId,
+                'subject_id' => $subjectId,
+                'teacher_id' => $teacherId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        DB::table('class_subjects')->insert($classSubjects);
     }
 }

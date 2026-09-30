@@ -1,60 +1,56 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const UsersPagination = ({
-  pagination,
-  onPrevious,
-  onNext,
-}) => {
-  if (!pagination) return null;
+const UsersPagination = ({ pagination, onPrevious, onNext }) => {
+  if (!pagination) {
+    return null;
+  }
 
   const currentPage = pagination.current_page;
   const lastPage = pagination.last_page;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3.5 transition-colors">
-      
-      {/* Text Info */}
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        Page{" "}
-        <span className="font-semibold text-slate-900 dark:text-slate-100">
-          {currentPage}
-        </span>{" "}
-        of{" "}
-        <span className="font-semibold text-slate-900 dark:text-slate-100">
-          {lastPage}
-        </span>
-
-        <span className="mx-2.5 text-slate-300 dark:text-slate-700">•</span>
-
+    <div className="flex flex-col gap-4 rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      {/* Showing Information */}
+      <p className="text-sm text-gray-500">
+        Page <span className="font-medium text-gray-700">{currentPage}</span> of{" "}
+        <span className="font-medium text-gray-700">{lastPage}</span>{" "}
+        <span className="mx-2 text-gray-300">•</span>
         Total:{" "}
-        <span className="font-semibold text-slate-900 dark:text-slate-100">
+        <span className="font-medium text-gray-700">
           {pagination.total?.toLocaleString() ?? 0}
-        </span>
+        </span>{" "}
+        users
       </p>
 
-      {/* Buttons */}
-      <div className="flex items-center gap-2 w-full sm:w-auto">
+      {/* Pagination Buttons */}
+      <div className="flex items-center gap-2">
+        {/* Previous */}
         <button
           type="button"
           onClick={onPrevious}
           disabled={currentPage <= 1}
-          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="flex items-center gap-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <ChevronLeft size={16} />
-          <span>Previous</span>
+          <ChevronLeft size={17} />
+          Previous
         </button>
 
+        {/* Current Page */}
+        <span className="rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600">
+          {currentPage}
+        </span>
+
+        {/* Next */}
         <button
           type="button"
           onClick={onNext}
           disabled={currentPage >= lastPage}
-          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="flex items-center gap-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <span>Next</span>
-          <ChevronRight size={16} />
+          Next
+          <ChevronRight size={17} />
         </button>
       </div>
-
     </div>
   );
 };
